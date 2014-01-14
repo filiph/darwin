@@ -61,6 +61,17 @@ void main() {
               greaterThan(algo.generations.last.bestFitness));
         }));
     });
+    
+    test("works without elitism", () {
+      breeder.elitismCount = 0;
+      // Start the algorithm.
+      algo.runUntilDone()
+        .then(expectAsync1((_) {
+          // Remember, lower fitness result is better.
+          expect(algo.generations.first.bestFitness,
+              greaterThan(algo.generations.last.bestFitness));
+        }));
+    });
   });
 }
 
