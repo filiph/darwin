@@ -1,0 +1,122 @@
+part of darwin;
+
+abstract class GenerationBreeder<T extends Phenotype> {
+  num mutationRate = 0.01;  // 0.01 means that every gene has 1% probability of mutating
+  num mutationStrength = 1.0;  // 1.0 means any value can become any other value
+  num crossoverPropability = 1.0;
+  
+  num fitnessSharingRadius = 0.1;
+  num fitnessSharingAlpha = 1;
+  
+  Generation<T> breedNewGeneration(List<Generation> precursors);
+  
+  /**
+   * Picks two phenotypes from the pool at random, compares them, and returns
+   * the one with the better fitness.
+   */
+  T getRandomTournamentWinner(List<T> pool) {
+    Math.Random random = new Math.Random();
+    T first = pool[random.nextInt(pool.length)];
+    T second;
+    while (true) {
+      second = pool[random.nextInt(pool.length)];
+      if (second != first) break;
+    }
+    assert(first.result != null);
+    assert(second.result != null);
+    
+    if (first._resultWithFitnessSharingApplied != null && 
+        second._resultWithFitnessSharingApplied != null) {
+      // Fitness sharing was applied. Compare those numbers.
+      if (first._resultWithFitnessSharingApplied < 
+          second._resultWithFitnessSharingApplied) {
+        return first;
+      } else {
+        return second;
+      }
+    }
+    
+    if (first.result < second.result) {
+      return first;
+    } else {
+      return second;
+    }
+  }
+  
+  void mutate(T phenotype, {num mutationRate, num mutationStrength}) {
+    if (mutationRate == null) mutationRate = this.mutationRate;
+    if (mutationStrength == null) mutationStrength = this.mutationStrength;
+    Math.Random random = new Math.Random();
+    for (int i = 0; i < phenotype.genes.length; i++) {
+      if (random.nextDouble() < mutationRate) {
+        phenotype.genes[i] = phenotype.mutateGene(phenotype.genes[i], mutationStrength);
+      }
+    }
+  }
+  
+  /**
+   * Returns a [List] of length 2 (2 children), each having a List of genes
+   * created by crossing over parents' genes.
+   * 
+   * The crossover only happens with [crossoverPropability]. Otherwise, exact
+   * copies of parents are returned.
+   */
+  List<List<Object>> crossoverParents(T a, T b, {int crossoverPointsCount: 2}) {
+    Math.Random random = new Math.Random();
+    
+    if (random.nextDouble() < (1 - crossoverPropability)) {
+      // No crossover. Return genes as they are.
+      return [new List.from(a.genes, growable: false),
+              new List.from(b.genes, growable: false)];
+    }
+    
+    assert(crossoverPointsCount < a.genes.length - 1);
+    int length = a.genes.length;
+    assert(length == b.genes.length);
+    Set<int> crossoverPoints = new Set<int>();
+
+    // Genes:   0 1 2 3 4 5 6
+    // Xpoints:  0 1 2 3 4 5
+    while (crossoverPoints.length < crossoverPointsCount) {
+      crossoverPoints.add(random.nextInt(length - 1));
+    }
+    List<Object> child1genes = new List(length);
+    List<Object> child2genes = new List(length);
+    bool crossover = false;
+    for (int i = 0; i < length; i++) {
+      if (!crossover) {
+        child1genes[i] = a.genes[i];
+        child2genes[i] = b.genes[i];
+      } else {
+        child1genes[i] = b.genes[i];
+        child2genes[i] = a.genes[i];
+      }
+      if (crossoverPoints.contains(i)) {
+        crossover = !crossover;
+      }
+    }
+    return [child1genes, child2genes];
+  }
+  
+  
+  /**
+   * Iterates over [members] and raises their fitness score according to
+   * their uniqueness.
+   * 
+   * Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
+   * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf
+   */
+  void applyFitnessSharingToResults(Generation generation) {
+    generation.members.forEach((T ph) {
+      num nicheCount = generation.getSimilarPhenotypes(ph, fitnessSharingRadius)
+        .map((T other) => ph.computeHammingDistance(other))  // XXX: computing hamming distance twice (in getSimilarPhenotypes and here)
+        .fold(0, (num sum, num distance) => 
+            sum + 
+            (1 - Math.pow(distance/fitnessSharingRadius, fitnessSharingAlpha)));
+      // The algorithm is modified - we multiply the result instead of 
+      // dividing it. (Because we count 0.0 as perfect fitness. The smaller
+      // the result number, the fitter the phenotype.)
+      ph._resultWithFitnessSharingApplied = ph.result * nicheCount;  
+    });
+  }
+}

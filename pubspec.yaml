@@ -1,0 +1,6 @@
+name: darwin
+version: 0.1.0
+description: Genetic algorithm library for Dart.
+#dependencies:
+dev_dependencies:
+  unittest: any
