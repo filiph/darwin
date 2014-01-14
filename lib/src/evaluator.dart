@@ -4,11 +4,21 @@ part of darwin;
 abstract class PhenotypeEvaluator<T extends Phenotype> {
   Object userData;
   Completer _completer;
+  
+  /**
+   * Evaluate takes the phenotype and returns its fitness score. The lower the
+   * fitness score, the better the phenotype. Fitness score of [:0.0:] means
+   * that the phenotype is perfect.
+   */
   Future<num> evaluate(T phenotype);
   
-  PrintFunction printf = print;
+  /// Set automatically by [GeneticAlgorithm].
+  PrintFunction _printf = print;
 }
 
+/**
+ * For use when multiple experiments should be done with each phenotype.
+ */
 abstract class PhenotypeSerialEvaluator<T extends Phenotype> 
       extends PhenotypeEvaluator<T> {
   /**
@@ -22,14 +32,14 @@ abstract class PhenotypeSerialEvaluator<T extends Phenotype>
     runOneEvaluation(phenotype, experimentIndex)
     .then((num result) {
       if (result == null) {
-        printf("Cummulative result for phenotype: $cummulativeResult");
+        _printf("Cummulative result for phenotype: $cummulativeResult");
         _completer.complete(cummulativeResult);
       } else if (result.isInfinite) {
-        printf("Result for experiment #$experimentIndex: FAIL\nFailing phenotype");
+        _printf("Result for experiment #$experimentIndex: FAIL\nFailing phenotype");
         _completer.complete(double.INFINITY);
       } else {
         cummulativeResult += result;
-        printf("Result for experiment: $result (cummulative: $cummulativeResult)");
+        _printf("Result for experiment: $result (cummulative: $cummulativeResult)");
         _next(phenotype, experimentIndex + 1);
       }
     });
@@ -38,7 +48,7 @@ abstract class PhenotypeSerialEvaluator<T extends Phenotype>
   num cummulativeResult;
   
   Future<num> evaluate(T phenotype) {
-    printf("Evaluating $phenotype");
+    _printf("Evaluating $phenotype");
     cummulativeResult = 0;
     userData = null;
     _completer = new Completer();

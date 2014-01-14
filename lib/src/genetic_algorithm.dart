@@ -23,7 +23,7 @@ class GeneticAlgorithm<T extends Phenotype> {
       {this.printf: print, this.statusf: print}) 
       : generationSize = firstGeneration.members.length {
     generations.add(firstGeneration);
-    evaluator.printf = printf;
+    evaluator._printf = printf;
   }
   
   Completer _doneCompleter;
