@@ -30,3 +30,5 @@ algo.runUntilDone()
     .forEach((Phenotype ph) => print("${ph.genesAsString}"));
 });
 ```
+
+See `test/unittest.dart` for examples of classes.
