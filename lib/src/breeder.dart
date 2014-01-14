@@ -1,14 +1,64 @@
 part of darwin;
 
-abstract class GenerationBreeder<T extends Phenotype> {
+class GenerationBreeder<T extends Phenotype> {
+  GenerationBreeder(T createBlankPhenotype()) 
+      : createBlankPhenotype = createBlankPhenotype;
+  
+  /**
+   * Function that generates blank (or random) phenotypes of type [T]. This
+   * needs to be provided because `new T();` can't be used.
+   */
+  final Function createBlankPhenotype;
+  
   num mutationRate = 0.01;  // 0.01 means that every gene has 1% probability of mutating
   num mutationStrength = 1.0;  // 1.0 means any value can become any other value
   num crossoverPropability = 1.0;
   
+  bool fitnessSharing = true;
   num fitnessSharingRadius = 0.1;
   num fitnessSharingAlpha = 1;
   
-  Generation<T> breedNewGeneration(List<Generation> precursors);
+  /**
+   * Number of best phenotypes that are copied verbatim to next generation.
+   */
+  int elitismCount = 1;
+  
+  Generation<T> breedNewGeneration(List<Generation> precursors) {
+    Generation<T> newGen = new Generation<T>();
+    // TODO: allow for taking more than the very last generation?
+    List<T> pool = precursors.last.members.toList(growable: false);
+    pool.sort((T a, T b) => a.result - b.result);
+    int length = precursors.last.members.length;
+    
+    // Elitism
+    for (int i = 0; i < elitismCount; i++) {
+      T clone1 = createBlankPhenotype();
+      clone1.genes = pool.first.genes;
+      newGen.members.add(clone1);
+    }
+    
+    // Crossover breeding
+    while (newGen.members.length < length) {
+      T parent1 = getRandomTournamentWinner(pool);
+      T parent2 = getRandomTournamentWinner(pool);
+      T child1 = createBlankPhenotype();
+      T child2 = createBlankPhenotype();
+      List<List<bool>> childrenGenes = 
+          crossoverParents(parent1, parent2, 
+              crossoverPointsCount: parent1.genes.length ~/ 2);
+      child1.genes = childrenGenes[0];
+      child2.genes = childrenGenes[1];
+      newGen.members.add(child1);
+      newGen.members.add(child2);
+    }
+    // Remove the phenotypes over length.
+    while (newGen.members.length > length) {
+      newGen.members.removeLast();
+    }
+    newGen.members.skip(elitismCount)  // Do not mutate elite.
+      .forEach((T ph) => mutate(ph));
+    return newGen;
+  }
   
   /**
    * Picks two phenotypes from the pool at random, compares them, and returns
@@ -103,10 +153,14 @@ abstract class GenerationBreeder<T extends Phenotype> {
    * Iterates over [members] and raises their fitness score according to
    * their uniqueness.
    * 
+   * If [fitnessSharing] is [:false:], doesn't do anything.
+   * 
    * Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
    * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf
    */
   void applyFitnessSharingToResults(Generation generation) {
+    if (fitnessSharing == false) return;
+    
     generation.members.forEach((T ph) {
       num nicheCount = generation.getSimilarPhenotypes(ph, fitnessSharingRadius)
         .map((T other) => ph.computeHammingDistance(other))  // XXX: computing hamming distance twice (in getSimilarPhenotypes and here)

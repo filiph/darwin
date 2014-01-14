@@ -6,7 +6,7 @@ import "dart:async";
 void main() {
   Generation<MyPhenotype> firstGeneration;
   MyEvaluator evaluator;
-  MyGenerationBreeder breeder;
+  GenerationBreeder breeder;
   GeneticAlgorithm algo;
   
   group("Genetic algorithm", () {
@@ -27,7 +27,7 @@ void main() {
       
       // Breeders are in charge of creating new generations from previous ones (that
       // have been graded by the evaluator). 
-      breeder = new MyGenerationBreeder()
+      breeder = new GenerationBreeder(() => new MyPhenotype())
         ..crossoverPropability = 0.8;
       
       algo = new GeneticAlgorithm(firstGeneration, evaluator, breeder);
@@ -50,11 +50,21 @@ void main() {
               greaterThan(algo.generations.last.bestFitness));
         }));
     });
+    
+    test("works without fitness sharing", () {
+      breeder.fitnessSharing = false;
+      // Start the algorithm.
+      algo.runUntilDone()
+        .then(expectAsync1((_) {
+          // Remember, lower fitness result is better.
+          expect(algo.generations.first.bestFitness,
+              greaterThan(algo.generations.last.bestFitness));
+        }));
+    });
   });
 }
 
 Random random = new Random(); 
-
 
 class MyEvaluator extends PhenotypeEvaluator<MyPhenotype> {
   Future<num> evaluate(MyPhenotype phenotype) {
@@ -62,40 +72,6 @@ class MyEvaluator extends PhenotypeEvaluator<MyPhenotype> {
     // the worse outcome of the fitness function.
     return new Future.value(
         phenotype.genes.where((bool v) => v == false).length);
-  }
-}
-
-class MyGenerationBreeder extends GenerationBreeder<MyPhenotype> {
-  Generation<MyPhenotype> breedNewGeneration(List<Generation> precursors) {
-    Generation<MyPhenotype> newGen = new Generation<MyPhenotype>();
-    List<MyPhenotype> pool = precursors.last.members.toList(growable: false);
-    pool.sort((MyPhenotype a, MyPhenotype b) => a.result - b.result);
-    int length = precursors.last.members.length;
-    // Elitism
-    MyPhenotype clone1 = new MyPhenotype();
-    clone1.genes = pool.first.genes;
-    newGen.members.add(clone1);
-    // Crossover breeding
-    while (newGen.members.length < length) {
-      MyPhenotype parent1 = getRandomTournamentWinner(pool);
-      MyPhenotype parent2 = getRandomTournamentWinner(pool);
-      MyPhenotype child1 = new MyPhenotype();
-      MyPhenotype child2 = new MyPhenotype();
-      List<List<bool>> childrenGenes = 
-          crossoverParents(parent1, parent2, 
-              crossoverPointsCount: parent1.genes.length ~/ 2);
-      child1.genes = childrenGenes[0];
-      child2.genes = childrenGenes[1];
-      newGen.members.add(child1);
-      newGen.members.add(child2);
-    }
-    // Remove the phenotypes over length.
-    while (newGen.members.length > length) {
-      newGen.members.removeLast();
-    }
-    newGen.members.skip(1)  // Do not mutate elite.
-      .forEach((MyPhenotype ph) => mutate(ph));
-    return newGen;
   }
 }
 

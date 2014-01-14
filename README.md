@@ -1,7 +1,7 @@
 darwin
 ======
 
-A genetic algorithm library for Dart.
+A genetic algorithm library for Dart. 
 
 Example use:
 
