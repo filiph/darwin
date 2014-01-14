@@ -16,8 +16,9 @@ var firstGeneration = new Generation<MyPhenotype>()
 var evaluator = new MyEvaluator();
 
 // Breeders are in charge of creating new generations from previous ones (that
-// have been graded by the evaluator). 
-var breeder = new MyGenerationBreeder()
+// have been graded by the evaluator). Their only required argument is
+// a function that returns a blank phenotype.
+var breeder = new GenerationBreeder(() => new MyPhenotype())
   ..crossoverPropability = 0.8;
 
 var algo = new GeneticAlgorithm(firstGeneration, evaluator, breeder);
@@ -31,4 +32,4 @@ algo.runUntilDone()
 });
 ```
 
-See `test/unittest.dart` for examples of classes.
+See `test/unittest.dart` for examples of subclassing Phenotype and Evaluator.
