@@ -13,6 +13,10 @@ class GeneticAlgorithm<T extends Phenotype> {
   int currentExperiment = 0;
   int currentGeneration = 0;
   
+  Stream<Generation<T>> get onGenerationEvaluated =>
+      _onGenerationEvaluatedController.stream;
+  StreamController<Generation<T>> _onGenerationEvaluatedController;
+  
   List<Generation<T>> generations = new List<Generation>();
   Iterable<T> get population => 
       generations.expand((Generation<T> gen) => gen.members);
@@ -24,6 +28,8 @@ class GeneticAlgorithm<T extends Phenotype> {
       : generationSize = firstGeneration.members.length {
     generations.add(firstGeneration);
     evaluator._printf = printf;
+    
+    _onGenerationEvaluatedController = new StreamController<Generation<T>>();
   }
   
   Completer _doneCompleter;
@@ -63,6 +69,7 @@ AVG  ${generations.last.averageFitness.toStringAsFixed(2)}
 BEST ${generations.last.bestFitness.toStringAsFixed(2)}
 """);
       printf("---");
+      _onGenerationEvaluatedController.add(generations.last);
       if (currentExperiment >= MAX_EXPERIMENTS) {
         printf("All experiments done ($currentExperiment)");
         _doneCompleter.complete();

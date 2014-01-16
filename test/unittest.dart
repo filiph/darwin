@@ -30,7 +30,8 @@ void main() {
       breeder = new GenerationBreeder(() => new MyPhenotype())
         ..crossoverPropability = 0.8;
       
-      algo = new GeneticAlgorithm(firstGeneration, evaluator, breeder);
+      algo = new GeneticAlgorithm(firstGeneration, evaluator, breeder,
+          printf: (_) {return;}, statusf: (_) {return;});
     });
     
     test("terminates", () {
@@ -47,7 +48,7 @@ void main() {
         .then(expectAsync1((_) {
           // Remember, lower fitness result is better.
           expect(algo.generations.first.bestFitness,
-              greaterThan(algo.generations.last.bestFitness));
+              greaterThanOrEqualTo(algo.generations.last.bestFitness));
         }));
     });
     
@@ -58,7 +59,7 @@ void main() {
         .then(expectAsync1((_) {
           // Remember, lower fitness result is better.
           expect(algo.generations.first.bestFitness,
-              greaterThan(algo.generations.last.bestFitness));
+              greaterThanOrEqualTo(algo.generations.last.bestFitness));
         }));
     });
     
@@ -69,8 +70,18 @@ void main() {
         .then(expectAsync1((_) {
           // Remember, lower fitness result is better.
           expect(algo.generations.first.bestFitness,
-              greaterThan(algo.generations.last.bestFitness));
+              greaterThanOrEqualTo(algo.generations.last.bestFitness));
         }));
+    });
+    
+    test("onGenerationEvaluatedController works", () {
+      // Register the hook;
+      algo.onGenerationEvaluated.listen(expectAsync1((Generation g) {
+        expect(g.averageFitness, isNotNull);
+      }));
+      
+      // Start the algorithm.
+      algo.runUntilDone();
     });
   });
 }
