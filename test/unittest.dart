@@ -81,7 +81,6 @@ void main() {
     test("onGenerationEvaluatedController works", () {
       // Register the hook;
       algo.onGenerationEvaluated.listen(expectAsync1((Generation g) {
-        print(g.best);
         expect(g.averageFitness, isNotNull);
         expect(g.best, isNotNull);
       }, max: -1));
