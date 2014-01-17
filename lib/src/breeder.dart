@@ -27,7 +27,7 @@ class GenerationBreeder<T extends Phenotype> {
     Generation<T> newGen = new Generation<T>();
     // TODO: allow for taking more than the very last generation?
     List<T> pool = precursors.last.members.toList(growable: false);
-    pool.sort((T a, T b) => a.result - b.result);
+    pool.sort((T a, T b) => (a.result - b.result).toInt());
     int length = precursors.last.members.length;
     
     // Elitism
