@@ -17,8 +17,12 @@ void main() {
       firstGeneration = new Generation<MyPhenotype>();
       
       // Fill it with random phenotypes.
-      for (int i = 0; i < 10; i++) {
-        firstGeneration.members.add(new MyPhenotype.Random());
+      while (firstGeneration.members.length < 10) {
+        var member = new MyPhenotype.Random();
+        // Guard against a winning phenotype in first generation.
+        if (member.genes.any((gene) => gene == false)) {
+          firstGeneration.members.add(member);
+        }
       }
       
       // Evaluators take each phenotype and assign a fitness value to it according
@@ -77,11 +81,24 @@ void main() {
     test("onGenerationEvaluatedController works", () {
       // Register the hook;
       algo.onGenerationEvaluated.listen(expectAsync1((Generation g) {
+        print(g.best);
         expect(g.averageFitness, isNotNull);
-      }));
+        expect(g.best, isNotNull);
+      }, max: -1));
       
       // Start the algorithm.
-      algo.runUntilDone();
+      algo.runUntilDone()
+      .then(expectAsync1((_) {
+        // Wait for done.
+      }));
+    });
+    
+    test("Generation.best is assigned to last generation after done", () {
+      // Start the algorithm.
+      algo.runUntilDone()
+      .then(expectAsync1((_) {
+        expect(algo.generations.last.best, isNotNull);
+      }));
     });
   });
 }
