@@ -31,7 +31,12 @@ class Generation<T extends Phenotype> {
     bestFitness = double.INFINITY;
     members.forEach((T ph) {
       cummulativeFitness += ph.result;
-      if (ph.result < bestFitness) bestFitness = ph.result;
+      if (ph.result < bestFitness) {
+        bestFitness = ph.result;
+        best = ph;
+      }
     });
   }
+  
+  T best;
 }
