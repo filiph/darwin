@@ -1,4 +1,11 @@
-part of darwin;
+library darwin.genetic_algorithm;
+
+import 'dart:async';
+
+import 'package:darwin/src/breeder.dart';
+import 'package:darwin/src/evaluator.dart';
+import 'package:darwin/src/generation.dart';
+import 'package:darwin/src/phenotype.dart';
 
 class GeneticAlgorithm<T extends Phenotype> {
   final int generationSize;
@@ -27,7 +34,7 @@ class GeneticAlgorithm<T extends Phenotype> {
       {this.printf: print, this.statusf: print})
       : generationSize = firstGeneration.members.length {
     generations.add(firstGeneration);
-    evaluator._printf = printf;
+    evaluator.printf = printf;
 
     _onGenerationEvaluatedController = new StreamController<Generation<T>>();
   }

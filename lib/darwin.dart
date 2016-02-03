@@ -1,11 +1,7 @@
 library darwin;
 
-import 'dart:async';
-import 'dart:math' as Math;
-import 'dart:convert' show JSON;
-
-part "src/genetic_algorithm.dart";
-part "src/breeder.dart";
-part "src/evaluator.dart";
-part "src/generation.dart";
-part "src/phenotype.dart";
+export "package:darwin/src/breeder.dart";
+export "package:darwin/src/evaluator.dart";
+export "package:darwin/src/generation.dart";
+export "package:darwin/src/genetic_algorithm.dart";
+export "package:darwin/src/phenotype.dart";

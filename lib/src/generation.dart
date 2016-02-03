@@ -1,4 +1,6 @@
-part of darwin;
+library darwin.generation;
+
+import 'package:darwin/src/phenotype.dart';
 
 class Generation<T extends Phenotype> {
   List<T> members = new List<T>();

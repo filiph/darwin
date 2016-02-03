@@ -1,4 +1,9 @@
-part of darwin;
+library darwin.evaluator;
+
+import "dart:async";
+
+import 'package:darwin/src/phenotype.dart';
+import 'package:darwin/src/genetic_algorithm.dart';
 
 // TODO: can be implemented as an Isolate
 abstract class PhenotypeEvaluator<T extends Phenotype> {
@@ -13,7 +18,7 @@ abstract class PhenotypeEvaluator<T extends Phenotype> {
   Future<num> evaluate(T phenotype);
 
   /// Set automatically by [GeneticAlgorithm].
-  PrintFunction _printf = print;
+  PrintFunction printf = print;
 }
 
 /**
@@ -31,15 +36,15 @@ abstract class PhenotypeSerialEvaluator<T extends Phenotype>
   void _next(T phenotype, int experimentIndex) {
     runOneEvaluation(phenotype, experimentIndex).then((num result) {
       if (result == null) {
-        _printf("Cummulative result for phenotype: $cummulativeResult");
+        printf("Cummulative result for phenotype: $cummulativeResult");
         _completer.complete(cummulativeResult);
       } else if (result.isInfinite) {
-        _printf(
+        printf(
             "Result for experiment #$experimentIndex: FAIL\nFailing phenotype");
         _completer.complete(double.INFINITY);
       } else {
         cummulativeResult += result;
-        _printf(
+        printf(
             "Result for experiment: $result (cummulative: $cummulativeResult)");
         _next(phenotype, experimentIndex + 1);
       }
@@ -49,7 +54,7 @@ abstract class PhenotypeSerialEvaluator<T extends Phenotype>
   num cummulativeResult;
 
   Future<num> evaluate(T phenotype) {
-    _printf("Evaluating $phenotype");
+    printf("Evaluating $phenotype");
     cummulativeResult = 0;
     userData = null;
     _completer = new Completer();

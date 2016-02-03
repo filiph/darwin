@@ -1,4 +1,6 @@
-part of darwin;
+library darwin.phenotype;
+
+import 'dart:convert';
 
 /**
  * A phenotype (also called chromosome or genotype) is one particular solution
@@ -6,7 +8,7 @@ part of darwin;
  *
  * After being evaluated by an [Evaluator], the phenotypes [result] is filled
  * with the output of the fitness function. If niching is at play, the result
- * is then modified into [_resultWithFitnessSharingApplied].
+ * is then modified into [resultWithFitnessSharingApplied].
  *
  * Phenotype can have genes of any type [T], although most often, [T] will be
  * either [bool] (binary genes) or [num] (continuous genes).
@@ -17,7 +19,7 @@ part of darwin;
 abstract class Phenotype<T> {
   List<T> genes;
   num result = null;
-  num _resultWithFitnessSharingApplied = null;
+  num resultWithFitnessSharingApplied = null;
 
   T mutateGene(T gene, num strength);
 

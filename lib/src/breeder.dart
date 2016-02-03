@@ -1,4 +1,9 @@
-part of darwin;
+library darwin.breeder;
+
+import 'dart:math' as Math;
+
+import 'package:darwin/src/phenotype.dart';
+import 'package:darwin/src/generation.dart';
 
 class GenerationBreeder<T extends Phenotype> {
   GenerationBreeder(T createBlankPhenotype())
@@ -77,11 +82,11 @@ class GenerationBreeder<T extends Phenotype> {
     assert(first.result != null);
     assert(second.result != null);
 
-    if (first._resultWithFitnessSharingApplied != null &&
-        second._resultWithFitnessSharingApplied != null) {
+    if (first.resultWithFitnessSharingApplied != null &&
+        second.resultWithFitnessSharingApplied != null) {
       // Fitness sharing was applied. Compare those numbers.
-      if (first._resultWithFitnessSharingApplied <
-          second._resultWithFitnessSharingApplied) {
+      if (first.resultWithFitnessSharingApplied <
+          second.resultWithFitnessSharingApplied) {
         return first;
       } else {
         return second;
@@ -179,7 +184,7 @@ class GenerationBreeder<T extends Phenotype> {
       // The algorithm is modified - we multiply the result instead of
       // dividing it. (Because we count 0.0 as perfect fitness. The smaller
       // the result number, the fitter the phenotype.)
-      ph._resultWithFitnessSharingApplied = ph.result * nicheCount;
+      ph.resultWithFitnessSharingApplied = ph.result * nicheCount;
     });
   }
 }
