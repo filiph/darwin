@@ -1,5 +1,5 @@
 name: darwin
-version: 0.2.4
+version: 0.2.5
 description: Genetic algorithm library for Dart.
 author: Filip Hracek <filip.hracek@gmail.com>
 homepage: https://github.com/filiph/darwin
