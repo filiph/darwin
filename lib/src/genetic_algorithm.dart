@@ -9,38 +9,38 @@ class GeneticAlgorithm<T extends Phenotype> {
    */
   num THRESHOLD_RESULT = 0.01;
   final int MAX_GENERATIONS_IN_MEMORY = 100;
-  
+
   int currentExperiment = 0;
   int currentGeneration = 0;
-  
+
   Stream<Generation<T>> get onGenerationEvaluated =>
       _onGenerationEvaluatedController.stream;
   StreamController<Generation<T>> _onGenerationEvaluatedController;
-  
+
   List<Generation<T>> generations = new List<Generation>();
-  Iterable<T> get population => 
+  Iterable<T> get population =>
       generations.expand((Generation<T> gen) => gen.members);
   final PhenotypeEvaluator evaluator;
   final GenerationBreeder breeder;
-  
-  GeneticAlgorithm(Generation firstGeneration, this.evaluator, this.breeder, 
-      {this.printf: print, this.statusf: print}) 
+
+  GeneticAlgorithm(Generation firstGeneration, this.evaluator, this.breeder,
+      {this.printf: print, this.statusf: print})
       : generationSize = firstGeneration.members.length {
     generations.add(firstGeneration);
     evaluator._printf = printf;
-    
+
     _onGenerationEvaluatedController = new StreamController<Generation<T>>();
   }
-  
+
   Completer _doneCompleter;
   Future runUntilDone() {
     _doneCompleter = new Completer();
     _evaluateNextGeneration();
     return _doneCompleter.future;
   }
-  
+
   /**
-   * Function used for printing info about the progress of the genetic 
+   * Function used for printing info about the progress of the genetic
    * algorithm. This is the standard console [print] by default.
    */
   final PrintFunction printf;
@@ -51,10 +51,9 @@ class GeneticAlgorithm<T extends Phenotype> {
    * the ideal implementation.
    */
   final PrintFunction statusf;
-  
+
   void _evaluateNextGeneration() {
-    evaluateLastGeneration()
-    .then((_) {
+    evaluateLastGeneration().then((_) {
       printf("Applying niching to results.");
       breeder.applyFitnessSharingToResults(generations.last);
       printf("Generation #$currentGeneration evaluation done. Results:");
@@ -86,7 +85,7 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
       _evaluateNextGeneration();
     });
   }
-  
+
   void _createNewGeneration() {
     printf("CREATING NEW GENERATION");
     generations.add(breeder.breedNewGeneration(generations));
@@ -98,14 +97,13 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
       generations.removeAt(0);
     }
   }
-  
+
   int memberIndex;
   void _evaluateNextGenerationMember() {
     T currentPhenotype = generations.last.members[memberIndex];
-    evaluator.evaluate(currentPhenotype)
-    .then((num result) {
+    evaluator.evaluate(currentPhenotype).then((num result) {
       currentPhenotype.result = result;
-      
+
       currentExperiment++;
       memberIndex++;
       if (memberIndex < generations.last.members.length) {
@@ -117,21 +115,21 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
       }
     });
   }
-  
+
   Completer _generationCompleter;
-  
+
   /**
    * Evaluates the latest generation and completes when done.
-   * 
+   *
    * TODO: Allow for multiple members being evaluated in parallel via
    * isolates.
    */
   Future evaluateLastGeneration() {
     _generationCompleter = new Completer();
-    
+
     memberIndex = 0;
     _evaluateNextGenerationMember();
-    
+
     return _generationCompleter.future;
   }
 }
