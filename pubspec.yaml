@@ -5,4 +5,4 @@ author: Filip Hracek <filip.hracek@gmail.com>
 homepage: https://github.com/filiph/darwin
 #dependencies:
 dev_dependencies:
-  unittest: any
+  test: any
