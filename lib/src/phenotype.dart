@@ -40,6 +40,53 @@ abstract class TreePhenotype<T extends GeneNode> extends Phenotype<T> {
   String get genesAsString => JSON.encode(root); /// TODO I'm sure this is garbage...
 }
 
-class GeneNode {
+class GeneNode extends Iterable<GeneNode> {
+  GeneNode parent;
   List<GeneNode> children;
+
+  deepClone(GeneNode parent) {
+    GeneNode clone = new GeneNode();
+    clone.parent = parent;
+    clone.children = _deepCloneChildren(clone);
+    return clone;
+  }
+
+  List<GeneNode> _deepCloneChildren(GeneNode parent) {
+    List<GeneNode> clonedChildren = null;
+    if (children != null) {
+      clonedChildren = [];
+      children.forEach((GeneNode child) {
+        clonedChildren.add(child.deepClone(parent));
+      });
+    }
+    return clonedChildren;
+  }
+
+  @override
+  Iterator<GeneNode> get iterator => new GeneNodeIterator(this);
+}
+
+class GeneNodeIterator extends Iterator<GeneNode> {
+
+  GeneNode _currentNode = null;
+
+  List<GeneNode> _nodesToVisit;
+
+  GeneNodeIterator(GeneNode startingNode) {
+    _nodesToVisit = [startingNode];
+  }
+
+  @override
+  GeneNode get current => _currentNode;
+
+  @override
+  bool moveNext() {
+    if (_nodesToVisit.isEmpty) {
+      return false;
+    }
+
+    _currentNode = _nodesToVisit.removeAt(0);
+    _nodesToVisit.insertAll(0, _currentNode.children);
+    return true;
+  }
 }

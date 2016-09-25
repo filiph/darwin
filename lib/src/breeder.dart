@@ -257,17 +257,117 @@ class TreeGenerationBreeder<T extends TreePhenotype> extends GenerationBreeder<T
   @override
   T createGeneticClone(T phenotypeToClone) {
     T clone = createBlankPhenotype();
-    clone.root = phenotypeToClone.root;
+    clone.root = phenotypeToClone.root.deepClone(null);
     return clone;
   }
 
   @override
   List<T> crossoverParents(T parent1, T parent2) {
-    // TODO: implement crossoverParents
+    T child1 = createGeneticClone(parent1);
+    T child2 = createGeneticClone(parent2);
+
+    Math.Random random = new Math.Random();
+    int child1SubtreeIndex = random.nextInt(_getNumDescendants(child1.root));
+    int child2SubtreeIndex = random.nextInt(_getNumDescendants(child2.root));
+
+    GeneNode child1Subtree = _getSubtreeAtIndex(child1.root, child1SubtreeIndex);
+    GeneNode child2Subtree = _getSubtreeAtIndex(child2.root, child2SubtreeIndex);
+
+    _swapSubtrees(child1Subtree, child2Subtree);
+
+    return [child1, child2];
   }
 
+  /// Swaps 2 subtrees from SEPARATE trees
+  /// TODO would be useful to have mutations in tree? then modify and provide as util
+  void _swapSubtrees(GeneNode node1, GeneNode node2) {
+    GeneNode node1Parent = node1.parent;
+    GeneNode node2Parent = node2.parent;
+
+    if (node1Parent != null) {
+      int node1Index = node1Parent.children.indexOf(node1);
+      node1Parent.children[node1Index] = node2;
+    }
+    node2.parent = node1Parent;
+
+    if (node2Parent != null) {
+      int node2Index = node2Parent.children.indexOf(node2);
+      node2Parent.children[node2Index] = node1;
+    }
+    node1.parent = node2Parent;
+  }
+
+  int _getNumDescendants(GeneNode node) {
+    if (node.children == null) {
+      return 0;
+    }
+
+    int numDescendants = node.children.length;
+
+    node.children.forEach((GeneNode node) {
+      numDescendants += _getNumDescendants(node);
+    });
+
+    return numDescendants;
+  }
+
+  GeneNode _getSubtreeAtIndex(GeneNode root, int subtreeIndex) {
+    int currentIndex = 0;
+    for (GeneNode node in root) {
+      if (currentIndex == subtreeIndex) {
+        return node;
+      }
+      currentIndex++;
+    }
+    return null;
+  }
+
+  /// TODO since there's an iterator now, can pull some of this to the super...
   @override
   void mutate(T phenotype, {num mutationRate, num mutationStrength}) {
-    // TODO: implement mutate
+    if (mutationRate == null) mutationRate = this.mutationRate;
+    if (mutationStrength == null) mutationStrength = this.mutationStrength;
+    Math.Random random = new Math.Random();
+
+    Map<int, GeneNode> geneIndexToMutation = {};
+    int geneIndex = 0;
+    for (GeneNode node in phenotype.root) {
+      if (random.nextDouble() < mutationRate) {
+        GeneNode mutatedGene = phenotype.mutateGene(node, mutationStrength);
+        geneIndexToMutation[geneIndex] = mutatedGene;
+      }
+      geneIndex++;
+    }
+
+    /// Don't want to modify tree during iteration, replace genes after mutation
+    geneIndexToMutation.forEach((int geneIndex, GeneNode mutation) {
+      GeneNode nodeToReplace = _getSubtreeAtIndex(phenotype.root, geneIndex);
+      _replaceNode(nodeToReplace, mutation);
+    });
+
+  }
+
+  _replaceNode(GeneNode nodeToReplace, GeneNode newNode) {
+    // set the correct references on the new node
+    newNode.parent = nodeToReplace.parent;
+    newNode.children = nodeToReplace.children;
+
+    // replace all references to the old node with references to the new node
+    if (nodeToReplace.parent != null) {
+      int nodeChildIndex = nodeToReplace.parent.children.indexOf(nodeToReplace);
+      nodeToReplace.parent.children[nodeChildIndex] = newNode;
+    }
+
+    if (nodeToReplace.children != null) {
+      nodeToReplace.children.forEach((GeneNode child) {
+        if (child != null) {
+          child.parent = newNode;
+        }
+      });
+    }
+
+    // remove all references on the old node for safety
+    nodeToReplace.parent = null;
+    nodeToReplace.children = null;
   }
 }
