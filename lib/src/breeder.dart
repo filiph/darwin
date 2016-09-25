@@ -166,9 +166,10 @@ class GenerationBreeder<T extends Phenotype> {
     if (fitnessSharing == false) return;
 
     generation.members.forEach((T ph) {
-      num nicheCount = generation
-          .getSimilarPhenotypes(ph, fitnessSharingRadius)
-          .map((T other) => ph.computeHammingDistance(
+      num nicheCount = generation.members
+          .where((T candidate) =>
+              _computeHammingDistance(ph, candidate) < fitnessSharingRadius)
+          .map((T other) => _computeHammingDistance(ph,
               other)) // XXX: computing hamming distance twice (in getSimilarPhenotypes and here)
           .fold(
               0,
@@ -181,5 +182,24 @@ class GenerationBreeder<T extends Phenotype> {
       // the result number, the fitter the phenotype.)
       ph._resultWithFitnessSharingApplied = ph.result * nicheCount;
     });
+  }
+
+  /**
+   * Returns the degree to which this chromosome has dissimilar genes with the
+   * other. If chromosomes are identical, returns [:0.0:]. If all genes are
+   * different, returns [:1.0:].
+   *
+   * Genes are considered different when they are not equal. There is no
+   * half-different gene (which would make sense for [num] genes, for example).
+   */
+  num _computeHammingDistance(T first, T second) {
+    int length = first.genes.length;
+    int similarCount = 0;
+    for (int i = 0; i < first.genes.length; i++) {
+      if (first.genes[i] == second.genes[i]) {
+        similarCount++;
+      }
+    }
+    return (1 - similarCount / length);
   }
 }
