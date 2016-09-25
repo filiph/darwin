@@ -6,7 +6,7 @@ import "dart:async";
 void main() {
   Generation<MyPhenotype> firstGeneration;
   MyEvaluator evaluator;
-  GenerationBreeder breeder;
+  ListGenerationBreeder breeder;
   GeneticAlgorithm algo;
 
   group("Genetic algorithm", () {
@@ -30,7 +30,7 @@ void main() {
 
       // Breeders are in charge of creating new generations from previous ones (that
       // have been graded by the evaluator).
-      breeder = new GenerationBreeder(() => new MyPhenotype())
+      breeder = new ListGenerationBreeder(() => new MyPhenotype())
         ..crossoverPropability = 0.8;
 
       algo = new GeneticAlgorithm(firstGeneration, evaluator, breeder,
@@ -103,7 +103,7 @@ class MyEvaluator extends PhenotypeEvaluator<MyPhenotype> {
   }
 }
 
-class MyPhenotype extends Phenotype<bool> {
+class MyPhenotype extends ListPhenotype<bool> {
   static int geneCount = 6;
 
   MyPhenotype();

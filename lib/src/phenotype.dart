@@ -15,13 +15,31 @@ part of darwin;
  * strength.
  */
 abstract class Phenotype<T> {
-  List<T> genes;
   num result = null;
-  num _resultWithFitnessSharingApplied = null;
+  num _resultWithFitnessSharingApplied = null; // TODO Is this only applicable for ListPhenotypes?
 
   T mutateGene(T gene, num strength);
 
   toString() => "Phenotype<$genesAsString>";
 
+  String get genesAsString;
+}
+
+abstract class ListPhenotype<T> extends Phenotype<T> {
+  List<T> genes;
+
+  @override
   String get genesAsString => JSON.encode(genes);
+}
+
+abstract class TreePhenotype<T extends GeneNode> extends Phenotype<T> {
+  GeneNode root;
+
+
+  @override
+  String get genesAsString => JSON.encode(root); /// TODO I'm sure this is garbage...
+}
+
+class GeneNode {
+  List<GeneNode> children;
 }

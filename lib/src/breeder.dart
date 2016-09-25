@@ -1,6 +1,6 @@
 part of darwin;
 
-class GenerationBreeder<T extends Phenotype> {
+abstract class GenerationBreeder<T extends Phenotype> {
   GenerationBreeder(T createBlankPhenotype())
       : createBlankPhenotype = createBlankPhenotype;
 
@@ -34,8 +34,7 @@ class GenerationBreeder<T extends Phenotype> {
 
     // Elitism
     for (int i = 0; i < elitismCount; i++) {
-      T clone1 = createBlankPhenotype();
-      clone1.genes = pool.first.genes;
+      T clone1 = createGeneticClone(pool.first);
       newGen.members.add(clone1);
     }
 
@@ -43,15 +42,13 @@ class GenerationBreeder<T extends Phenotype> {
     while (newGen.members.length < length) {
       T parent1 = getRandomTournamentWinner(pool);
       T parent2 = getRandomTournamentWinner(pool);
-      T child1 = createBlankPhenotype();
-      T child2 = createBlankPhenotype();
-      List<List<bool>> childrenGenes = crossoverParents(parent1, parent2,
-          crossoverPointsCount: parent1.genes.length ~/ 2);
-      child1.genes = childrenGenes[0];
-      child2.genes = childrenGenes[1];
-      newGen.members.add(child1);
-      newGen.members.add(child2);
+      /// TODO used to pass in crossoverPointsCount, now it's set directly in the implementation. Does it make sense for Trees to crossover more than once?
+      List<T> children = crossoverParents(parent1, parent2);
+      children.forEach((T child) {
+        newGen.members.add(child);
+      });
     }
+
     // Remove the phenotypes over length.
     while (newGen.members.length > length) {
       newGen.members.removeLast();
@@ -95,6 +92,59 @@ class GenerationBreeder<T extends Phenotype> {
     }
   }
 
+  T createGeneticClone(T phenotypeToClone); /// TODO investigate letting the phenotype handle this
+
+  /**
+   * Returns a [List] of length 2 containing phenotype children created by
+   * crossing over parents' genes.
+   *
+   * The crossover only happens with [crossoverPropability]. Otherwise, exact
+   * copies of parents are returned.
+   */
+  List<T> crossoverParents(T parent1, T parent2);
+
+  void mutate(T phenotype, {num mutationRate, num mutationStrength});
+
+  /**
+   * Iterates over [members] and raises their fitness score according to
+   * their uniqueness.
+   *
+   * If [fitnessSharing] is [:false:], doesn't do anything.
+   *
+   * Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
+   * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf
+   */
+  void applyFitnessSharingToResults(Generation generation); /// TODO I know nothing about this. Does it make sense for trees?
+}
+
+class ListGenerationBreeder<T extends ListPhenotype> extends GenerationBreeder<T> {
+  ListGenerationBreeder(T createBlankPhenotype()) : super(createBlankPhenotype);
+
+  @override
+  T createGeneticClone(T phenotypeToClone) {
+    return _createPhenotypeWithGenes(phenotypeToClone.genes);
+  }
+
+  T _createPhenotypeWithGenes(List<dynamic> genes) {
+    T phenotype = createBlankPhenotype();
+    phenotype.genes = genes;
+    return phenotype;
+  }
+
+  @override
+  List<T> crossoverParents(T parent1, T parent2) {
+    List<List<bool>> childrenGenes = getCrossoverGenes(parent1, parent2,
+        crossoverPointsCount: parent1.genes.length ~/ 2);
+
+    List<T> children = [
+      _createPhenotypeWithGenes(childrenGenes[0]),
+      _createPhenotypeWithGenes(childrenGenes[1])
+    ];
+
+    return children;
+  }
+
+  @override
   void mutate(T phenotype, {num mutationRate, num mutationStrength}) {
     if (mutationRate == null) mutationRate = this.mutationRate;
     if (mutationStrength == null) mutationStrength = this.mutationStrength;
@@ -114,7 +164,7 @@ class GenerationBreeder<T extends Phenotype> {
    * The crossover only happens with [crossoverPropability]. Otherwise, exact
    * copies of parents are returned.
    */
-  List<List<Object>> crossoverParents(T a, T b, {int crossoverPointsCount: 2}) {
+  List<List<Object>> getCrossoverGenes(T a, T b, {int crossoverPointsCount: 2}) {
     Math.Random random = new Math.Random();
 
     if (random.nextDouble() < (1 - crossoverPropability)) {
@@ -153,15 +203,7 @@ class GenerationBreeder<T extends Phenotype> {
     return [child1genes, child2genes];
   }
 
-  /**
-   * Iterates over [members] and raises their fitness score according to
-   * their uniqueness.
-   *
-   * If [fitnessSharing] is [:false:], doesn't do anything.
-   *
-   * Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
-   * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf
-   */
+  @override
   void applyFitnessSharingToResults(Generation generation) {
     if (fitnessSharing == false) return;
 
@@ -201,5 +243,31 @@ class GenerationBreeder<T extends Phenotype> {
       }
     }
     return (1 - similarCount / length);
+  }
+}
+
+class TreeGenerationBreeder<T extends TreePhenotype> extends GenerationBreeder<T> {
+  TreeGenerationBreeder(T createBlankPhenotype()) : super(createBlankPhenotype);
+
+  @override
+  void applyFitnessSharingToResults(Generation generation) {
+    // TODO ???
+  }
+
+  @override
+  T createGeneticClone(T phenotypeToClone) {
+    T clone = createBlankPhenotype();
+    clone.root = phenotypeToClone.root;
+    return clone;
+  }
+
+  @override
+  List<T> crossoverParents(T parent1, T parent2) {
+    // TODO: implement crossoverParents
+  }
+
+  @override
+  void mutate(T phenotype, {num mutationRate, num mutationStrength}) {
+    // TODO: implement mutate
   }
 }
