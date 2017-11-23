@@ -167,7 +167,7 @@ class GenerationBreeder<T extends Phenotype> {
    * Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
    * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf
    */
-  void applyFitnessSharingToResults(Generation generation) {
+  void applyFitnessSharingToResults(Generation<T> generation) {
     if (fitnessSharing == false) return;
 
     generation.members.forEach((T ph) {
