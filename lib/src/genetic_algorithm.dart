@@ -40,8 +40,9 @@ class GeneticAlgorithm<T extends Phenotype> {
   }
 
   Completer _doneCompleter;
-  Future runUntilDone() {
+  Future runUntilDone() async {
     _doneCompleter = new Completer();
+    await evaluator.init();
     _evaluateNextGeneration();
     return _doneCompleter.future;
   }
@@ -79,12 +80,14 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
       if (currentExperiment >= MAX_EXPERIMENTS) {
         printf("All experiments done ($currentExperiment)");
         _doneCompleter.complete();
+        evaluator.destroy();
         return;
       }
       if (generations.last.members
           .any((T ph) => ph.result < THRESHOLD_RESULT)) {
         printf("One of the phenotypes got over the threshold.");
         _doneCompleter.complete();
+        evaluator.destroy();
         return;
       }
       _createNewGeneration();

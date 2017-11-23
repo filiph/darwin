@@ -70,6 +70,9 @@ class GenerationBreeder<T extends Phenotype> {
   /**
    * Picks two phenotypes from the pool at random, compares them, and returns
    * the one with the better fitness.
+   *
+   * TODO: add simulated annealing temperature (probability to pick the worse
+   *       individual) - but is it needed when we have niching?
    */
   T getRandomTournamentWinner(List<T> pool) {
     Math.Random random = new Math.Random();

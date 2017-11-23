@@ -19,6 +19,14 @@ abstract class PhenotypeEvaluator<T extends Phenotype> {
 
   /// Set automatically by [GeneticAlgorithm].
   PrintFunction printf = print;
+
+  /// When evaluators need some work for initialization. By default,
+  /// this just returns an immediate [Future].
+  Future init() => new Future.value();
+
+  /// When evaluators need to dispose of resources. By default, this does
+  /// nothing.
+  void destroy() {}
 }
 
 /**
