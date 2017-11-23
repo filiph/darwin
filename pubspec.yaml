@@ -3,6 +3,10 @@ version: 0.3.0
 description: Genetic algorithm library for Dart.
 author: Filip Hracek <filip.hracek@gmail.com>
 homepage: https://github.com/filiph/darwin
+
+environment:
+    sdk: ">=1.8.0 <2.0.0"
+
 dependencies:
   meta: ^1.1.2
 dev_dependencies:
