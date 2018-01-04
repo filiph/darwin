@@ -2,6 +2,9 @@ library darwin.phenotype;
 
 import 'dart:convert';
 
+import 'package:darwin/src/result.dart';
+
+
 /**
  * A phenotype (also called chromosome or genotype) is one particular solution
  * to the problem (equation). The solution is encoded in [genes].
@@ -10,22 +13,25 @@ import 'dart:convert';
  * with the output of the fitness function. If niching is at play, the result
  * is then modified into [resultWithFitnessSharingApplied].
  *
- * Phenotype can have genes of any type [T], although most often, [T] will be
+ * Phenotype can have genes of any type [G], although most often, [G] will be
  * either [bool] (binary genes) or [num] (continuous genes).
  *
  * Subclasses must define [mutateGene], which returns a gene mutated by a given
  * strength.
  */
-abstract class Phenotype<T> {
-  List<T> genes;
-  num result = null;
+abstract class Phenotype<G, R extends FitnessResult>
+    implements Comparable<Phenotype<G, R>> {
+  List<G> genes;
+  R result = null;
   num resultWithFitnessSharingApplied = null;
 
-  T mutateGene(T gene, num strength);
+  G mutateGene(G gene, num strength);
 
   toString() => "Phenotype<$genesAsString>";
 
   String get genesAsString => JSON.encode(genes);
+
+  int compareTo(Phenotype<G, R> other) => this.result.compareTo(other.result);
 
   /**
    * Returns the degree to which this chromosome has dissimilar genes with the
@@ -34,8 +40,9 @@ abstract class Phenotype<T> {
    *
    * Genes are considered different when they are not equal. There is no
    * half-different gene (which would make sense for [num] genes, for example).
+   * You should make sure genes have sane equality and [hashCode].
    */
-  num computeHammingDistance(Phenotype<T> other) {
+  num computeHammingDistance(Phenotype<G, R> other) {
     int length = genes.length;
     int similarCount = 0;
     for (int i = 0; i < genes.length; i++) {

@@ -6,37 +6,40 @@ import 'package:darwin/src/breeder.dart';
 import 'package:darwin/src/evaluator.dart';
 import 'package:darwin/src/generation.dart';
 import 'package:darwin/src/phenotype.dart';
+import 'package:darwin/src/result.dart';
 
-class GeneticAlgorithm<T extends Phenotype> {
+class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   final int generationSize;
   int MAX_EXPERIMENTS = 20000;
   /**
    * When any [Phenotype] scores lower than this, the genetic algorithm
    * has ended.
    */
-  num THRESHOLD_RESULT = 0.01;
+  R THRESHOLD_RESULT;
   final int MAX_GENERATIONS_IN_MEMORY = 100;
 
   int currentExperiment = 0;
   int currentGeneration = 0;
 
-  Stream<Generation<T>> get onGenerationEvaluated =>
+  Stream<Generation<P, G, R>> get onGenerationEvaluated =>
       _onGenerationEvaluatedController.stream;
-  StreamController<Generation<T>> _onGenerationEvaluatedController;
+  StreamController<Generation<P, G, R>> _onGenerationEvaluatedController;
 
-  List<Generation<T>> generations = new List<Generation>();
-  Iterable<T> get population =>
-      generations.expand((Generation<T> gen) => gen.members);
-  final PhenotypeEvaluator evaluator;
-  final GenerationBreeder breeder;
+  final generations = new List<Generation<P, G, R>>();
+  Iterable<P> get population =>
+      generations.expand((Generation<P, G, R> gen) => gen.members);
+  final PhenotypeEvaluator<P, G, R> evaluator;
+  final GenerationBreeder<P, G, R> breeder;
 
-  GeneticAlgorithm(Generation firstGeneration, this.evaluator, this.breeder,
+  GeneticAlgorithm(
+      Generation<P, G, R> firstGeneration, this.evaluator, this.breeder,
       {this.printf: print, this.statusf: print})
       : generationSize = firstGeneration.members.length {
     generations.add(firstGeneration);
     evaluator.printf = printf;
 
-    _onGenerationEvaluatedController = new StreamController<Generation<T>>();
+    _onGenerationEvaluatedController =
+        new StreamController<Generation<P, G, R>>();
   }
 
   Completer _doneCompleter;
@@ -65,9 +68,9 @@ class GeneticAlgorithm<T extends Phenotype> {
       printf("Applying niching to results.");
       breeder.applyFitnessSharingToResults(generations.last);
       printf("Generation #$currentGeneration evaluation done. Results:");
-      generations.last.members.forEach((T member) {
-        printf("- ${member.result.toStringAsFixed(2)}");
-      });
+      // generations.last.members.forEach((P member) {
+      //   printf("- ${member.result.toStringAsFixed(2)}");
+      // });
       printf("- ${generations.last.averageFitness.toStringAsFixed(2)} AVG");
       printf("- ${generations.last.bestFitness.toStringAsFixed(2)} BEST");
       statusf("""
@@ -83,8 +86,9 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
         evaluator.destroy();
         return;
       }
-      if (generations.last.members
-          .any((T ph) => ph.result < THRESHOLD_RESULT)) {
+      if (THRESHOLD_RESULT != null &&
+          generations.last.members
+              .any((P ph) => ph.result.compareTo(THRESHOLD_RESULT) < 0)) {
         printf("One of the phenotypes got over the threshold.");
         _doneCompleter.complete();
         evaluator.destroy();
@@ -110,8 +114,8 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
 
   int memberIndex;
   void _evaluateNextGenerationMember() {
-    T currentPhenotype = generations.last.members[memberIndex];
-    evaluator.evaluate(currentPhenotype).then((num result) {
+    P currentPhenotype = generations.last.members[memberIndex];
+    evaluator.evaluate(currentPhenotype).then((R result) {
       currentPhenotype.result = result;
 
       currentExperiment++;
@@ -119,11 +123,28 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
       if (memberIndex < generations.last.members.length) {
         _evaluateNextGenerationMember();
       } else {
+        _assignParetoRanks();
         generations.last.computeSummary();
         _generationCompleter.complete();
         return;
       }
     });
+  }
+
+  void _assignParetoRanks() {
+    // No need to do this for single-objective results.
+    if (generations.last.members.first is SingleObjectiveResult) return;
+
+    for (final ph in generations.last.members) {
+      int rank = 1;
+      for (final other in generations.last.members) {
+        if (ph == other) continue;
+        if (other.result.dominates(ph.result)) {
+          rank += 1;
+        }
+      }
+      ph.result.paretoRank = rank;
+    }
   }
 
   Completer _generationCompleter;

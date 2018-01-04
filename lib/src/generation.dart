@@ -1,9 +1,10 @@
 library darwin.generation;
 
 import 'package:darwin/src/phenotype.dart';
+import 'package:darwin/src/result.dart';
 
-class Generation<T extends Phenotype> {
-  List<T> members = new List<T>();
+class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
+  List<P> members = new List<P>();
 
   /**
    * Filters the generation to phenotypes that are similar to [ph] as defined
@@ -12,9 +13,9 @@ class Generation<T extends Phenotype> {
    * This _includes_ the original [ph] (Because [ph]'s Hamming distance to
    * itself is [:0:].)
    */
-  Iterable<T> getSimilarPhenotypes(T ph, num radius) {
+  Iterable<P> getSimilarPhenotypes(P ph, num radius) {
     return members
-        .where((T candidate) => ph.computeHammingDistance(candidate) < radius);
+        .where((P candidate) => ph.computeHammingDistance(candidate) < radius);
   }
 
   num cummulativeFitness;
@@ -31,15 +32,15 @@ class Generation<T extends Phenotype> {
    */
   void computeSummary() {
     cummulativeFitness = 0;
-    bestFitness = double.INFINITY;
-    members.forEach((T ph) {
-      cummulativeFitness += ph.result;
-      if (ph.result < bestFitness) {
-        bestFitness = ph.result;
+    for (final ph in members) {
+      final result = ph.result.evaluate();
+      cummulativeFitness += result;
+      if (bestFitness == null || result.compareTo(bestFitness) < 0) {
+        bestFitness = result;
         best = ph;
       }
-    });
+    }
   }
 
-  T best;
+  P best;
 }

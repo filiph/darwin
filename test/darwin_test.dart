@@ -4,7 +4,7 @@ import "dart:math";
 import "dart:async";
 
 void main() {
-  Generation<MyPhenotype> firstGeneration;
+  Generation<MyPhenotype, bool, SingleObjectiveResult> firstGeneration;
   MyEvaluator evaluator;
   GenerationBreeder breeder;
   GeneticAlgorithm algo;
@@ -13,7 +13,8 @@ void main() {
     // Set up the variables.
     setUp(() {
       // Create first generation.
-      firstGeneration = new Generation<MyPhenotype>();
+      firstGeneration =
+          new Generation<MyPhenotype, bool, SingleObjectiveResult>();
 
       // Fill it with random phenotypes.
       while (firstGeneration.members.length < 10) {
@@ -30,11 +31,12 @@ void main() {
 
       // Breeders are in charge of creating new generations from previous ones (that
       // have been graded by the evaluator).
-      breeder = new GenerationBreeder(() => new MyPhenotype())
+      breeder = new GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>(
+          () => new MyPhenotype())
         ..crossoverPropability = 0.8;
 
-      algo = new GeneticAlgorithm(firstGeneration, evaluator, breeder,
-          printf: (_) {
+      algo = new GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult>(
+          firstGeneration, evaluator, breeder, printf: (_) {
         return;
       }, statusf: (_) {
         return;
@@ -94,16 +96,19 @@ void main() {
 
 Random random = new Random();
 
-class MyEvaluator extends PhenotypeEvaluator<MyPhenotype> {
-  Future<num> evaluate(MyPhenotype phenotype) {
+class MyEvaluator
+    extends PhenotypeEvaluator<MyPhenotype, bool, SingleObjectiveResult> {
+  Future<SingleObjectiveResult> evaluate(MyPhenotype phenotype) {
     // This implementation just counts false values - the more false values,
     // the worse outcome of the fitness function.
-    return new Future.value(
-        phenotype.genes.where((bool v) => v == false).length);
+    final result = new SingleObjectiveResult();
+    result.value =
+        phenotype.genes.where((bool v) => v == false).length.toDouble();
+    return new Future.value(result);
   }
 }
 
-class MyPhenotype extends Phenotype<bool> {
+class MyPhenotype extends Phenotype<bool, SingleObjectiveResult> {
   static int geneCount = 6;
 
   MyPhenotype();

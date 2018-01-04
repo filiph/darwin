@@ -4,13 +4,14 @@ import 'dart:math' as Math;
 
 import 'package:darwin/src/phenotype.dart';
 import 'package:darwin/src/generation.dart';
+import 'package:darwin/src/result.dart';
 
-class GenerationBreeder<T extends Phenotype> {
-  GenerationBreeder(T createBlankPhenotype())
+class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
+  GenerationBreeder(P createBlankPhenotype())
       : createBlankPhenotype = createBlankPhenotype;
 
   /**
-   * Function that generates blank (or random) phenotypes of type [T]. This
+   * Function that generates blank (or random) phenotypes of type [P]. This
    * needs to be provided because `new T();` can't be used.
    */
   final Function createBlankPhenotype;
@@ -29,28 +30,28 @@ class GenerationBreeder<T extends Phenotype> {
    */
   int elitismCount = 1;
 
-  Generation<T> breedNewGeneration(List<Generation> precursors) {
-    Generation<T> newGen = new Generation<T>();
+  Generation<P, G, R> breedNewGeneration(List<Generation<P, G, R>> precursors) {
+    Generation<P, G, R> newGen = new Generation<P, G, R>();
     // TODO: allow for taking more than the very last generation?
-    List<T> pool = precursors.last.members.toList(growable: false);
-    assert(pool.every((T ph) => ph.result != null));
-    pool.sort((T a, T b) => (a.result - b.result).toInt());
+    List<P> pool = precursors.last.members.toList(growable: false);
+    assert(pool.every((P ph) => ph.result != null));
+    pool.sort((P a, P b) => (a.result.compareTo(b.result)));
     int length = precursors.last.members.length;
 
     // Elitism
     for (int i = 0; i < elitismCount; i++) {
-      T clone1 = createBlankPhenotype();
-      clone1.genes = pool.first.genes;
+      P clone1 = createBlankPhenotype();
+      clone1.genes = pool[i].genes;
       newGen.members.add(clone1);
     }
 
     // Crossover breeding
     while (newGen.members.length < length) {
-      T parent1 = getRandomTournamentWinner(pool);
-      T parent2 = getRandomTournamentWinner(pool);
-      T child1 = createBlankPhenotype();
-      T child2 = createBlankPhenotype();
-      List<List<bool>> childrenGenes = crossoverParents(parent1, parent2,
+      P parent1 = getRandomTournamentWinner(pool);
+      P parent2 = getRandomTournamentWinner(pool);
+      P child1 = createBlankPhenotype();
+      P child2 = createBlankPhenotype();
+      List<List<G>> childrenGenes = crossoverParents(parent1, parent2,
           crossoverPointsCount: parent1.genes.length ~/ 2);
       child1.genes = childrenGenes[0];
       child2.genes = childrenGenes[1];
@@ -63,7 +64,7 @@ class GenerationBreeder<T extends Phenotype> {
     }
     newGen.members
         .skip(elitismCount) // Do not mutate elite.
-        .forEach((T ph) => mutate(ph));
+        .forEach((P ph) => mutate(ph));
     return newGen;
   }
 
@@ -74,16 +75,22 @@ class GenerationBreeder<T extends Phenotype> {
    * TODO: add simulated annealing temperature (probability to pick the worse
    *       individual) - but is it needed when we have niching?
    */
-  T getRandomTournamentWinner(List<T> pool) {
+  P getRandomTournamentWinner(List<P> pool) {
     Math.Random random = new Math.Random();
-    T first = pool[random.nextInt(pool.length)];
-    T second;
+    P first = pool[random.nextInt(pool.length)];
+    P second;
     while (true) {
       second = pool[random.nextInt(pool.length)];
       if (second != first) break;
     }
     assert(first.result != null);
     assert(second.result != null);
+
+    if (first.result.paretoRank < second.result.paretoRank) {
+      return first;
+    } else if (first.result.paretoRank > second.result.paretoRank) {
+      return second;
+    }
 
     if (first.resultWithFitnessSharingApplied != null &&
         second.resultWithFitnessSharingApplied != null) {
@@ -96,14 +103,14 @@ class GenerationBreeder<T extends Phenotype> {
       }
     }
 
-    if (first.result < second.result) {
+    if (first.result.compareTo(second.result) < 0) {
       return first;
     } else {
       return second;
     }
   }
 
-  void mutate(T phenotype, {num mutationRate, num mutationStrength}) {
+  void mutate(P phenotype, {num mutationRate, num mutationStrength}) {
     if (mutationRate == null) mutationRate = this.mutationRate;
     if (mutationStrength == null) mutationStrength = this.mutationStrength;
     Math.Random random = new Math.Random();
@@ -122,7 +129,7 @@ class GenerationBreeder<T extends Phenotype> {
    * The crossover only happens with [crossoverPropability]. Otherwise, exact
    * copies of parents are returned.
    */
-  List<List<Object>> crossoverParents(T a, T b, {int crossoverPointsCount: 2}) {
+  List<List<G>> crossoverParents(P a, P b, {int crossoverPointsCount: 2}) {
     Math.Random random = new Math.Random();
 
     if (random.nextDouble() < (1 - crossoverPropability)) {
@@ -170,24 +177,25 @@ class GenerationBreeder<T extends Phenotype> {
    * Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
    * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf
    */
-  void applyFitnessSharingToResults(Generation<T> generation) {
+  void applyFitnessSharingToResults(Generation<P, G, R> generation) {
     if (fitnessSharing == false) return;
 
-    generation.members.forEach((T ph) {
+    generation.members.forEach((P ph) {
       num nicheCount = generation
           .getSimilarPhenotypes(ph, fitnessSharingRadius)
-          .map((T other) => ph.computeHammingDistance(
+          .map((P other) => ph.computeHammingDistance(
               other)) // XXX: computing hamming distance twice (in getSimilarPhenotypes and here)
           .fold(
               0,
-              (num sum, num distance) => sum +
+              (num sum, num distance) =>
+                  sum +
                   (1 -
                       Math.pow(distance / fitnessSharingRadius,
                           fitnessSharingAlpha)));
       // The algorithm is modified - we multiply the result instead of
       // dividing it. (Because we count 0.0 as perfect fitness. The smaller
       // the result number, the fitter the phenotype.)
-      ph.resultWithFitnessSharingApplied = ph.result * nicheCount;
+      ph.resultWithFitnessSharingApplied = ph.result.evaluate() * nicheCount;
     });
   }
 }
