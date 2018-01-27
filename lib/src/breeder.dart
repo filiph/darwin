@@ -14,7 +14,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
    * Function that generates blank (or random) phenotypes of type [P]. This
    * needs to be provided because `new T();` can't be used.
    */
-  final Function createBlankPhenotype;
+  final P Function() createBlankPhenotype;
 
   num mutationRate =
       0.01; // 0.01 means that every gene has 1% probability of mutating
@@ -153,8 +153,8 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     while (crossoverPoints.length < crossoverPointsCount) {
       crossoverPoints.add(random.nextInt(length - 1));
     }
-    List<Object> child1genes = new List(length);
-    List<Object> child2genes = new List(length);
+    List<G> child1genes = new List(length);
+    List<G> child2genes = new List(length);
     bool crossover = false;
     for (int i = 0; i < length; i++) {
       if (!crossover) {

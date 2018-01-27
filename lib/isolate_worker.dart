@@ -39,20 +39,20 @@ import 'dart:isolate';
 ///         return fibonacci(payload);
 ///       }
 ///     }
-abstract class IsolateTask<T, S> {
+abstract class IsolateTask<T, R> {
   static final Random _random = new Random();
   final int id;
-  S result;
+  R result;
 
   static const int MAX_INT = (1 << 32) - 1;
 
   IsolateTask() : id = IsolateTask._random.nextInt(MAX_INT);
 
-  S execute();
+  R execute();
 }
 
 /// A single worker representing one [Isolate].
-class IsolateWorker {
+class IsolateWorker<T, R> {
   ReceivePort receivePort;
   SendPort _isolatePort;
 
@@ -67,19 +67,19 @@ class IsolateWorker {
   // Worker(ReceivePort receivePort) : receivePort = receivePort;
   IsolateWorker() {}
 
-  Future init() async {
+  Future<Null> init() async {
     if (_ready) return new Future.value();
-    var completer = new Completer();
+    var completer = new Completer<Null>();
 
     receivePort = new ReceivePort();
     await Isolate.spawn(_entryPoint, receivePort.sendPort);
 
-    _portSubscription = receivePort.listen((message) {
+    _portSubscription = receivePort.listen((Object message) {
       if (message is SendPort) {
         _isolatePort = message;
         completer.complete();
       } else {
-        IsolateTask task = message as IsolateTask;
+        IsolateTask<T, R> task = message as IsolateTask<T, R>;
         if (!_completers.containsKey(task.id)) {
           throw new StateError("Task ${task.id} not present.");
         }
@@ -94,8 +94,8 @@ class IsolateWorker {
     _portSubscription.cancel();
   }
 
-  Future send(IsolateTask task) {
-    var completer = new Completer();
+  Future<R> send(IsolateTask<T, R> task) {
+    var completer = new Completer<R>();
     _completers[task.id] = completer;
     _isolatePort.send(task);
     return completer.future;
@@ -105,19 +105,19 @@ class IsolateWorker {
 /// A pool of workers.
 ///
 /// It's recommended that [count] is less or equal to the number of CPU cores.
-class IsolateWorkerPool {
+class IsolateWorkerPool<T, R> {
   final int count;
-  final List<IsolateWorker> _workers;
+  final List<IsolateWorker<T, R>> _workers;
 
   bool _initialized = false;
 
   IsolateWorkerPool({int count: 4})
       : count = count,
-        _workers = new List<IsolateWorker>(count);
+        _workers = new List<IsolateWorker<T, R>>(count);
 
   Future init() async {
     for (int i = 0; i < count; i++) {
-      var worker = new IsolateWorker();
+      var worker = new IsolateWorker<T, R>();
       await worker.init();
       _workers[i] = worker;
     }
@@ -130,21 +130,21 @@ class IsolateWorkerPool {
 
   static final Random _random = new Random();
 
-  Future send(IsolateTask task) async {
+  Future<R> send(IsolateTask<T, R> task) async {
     if (!_initialized) {
       throw new StateError("Must run init() first before using pool.");
     }
     var worker = _workers[_random.nextInt(count)];
 
     while (worker.isTooBusy) {
-      await new Future.delayed(const Duration(milliseconds: 10));
+      await new Future<Null>.delayed(const Duration(milliseconds: 10));
     }
     return worker.send(task);
   }
 
-  Future<List> sendMany(List<IsolateTask> tasks) async {
+  Future<List<R>> sendMany(List<IsolateTask<T, R>> tasks) async {
     // return Future.wait(tasks.map((t) => send(t)));
-    List<Future> futures = new List(tasks.length);
+    List<Future<R>> futures = new List(tasks.length);
     int i = 0;
 
     // int done = 0;
@@ -154,7 +154,7 @@ class IsolateWorkerPool {
       while (_workers[j].isTooBusy) {
         j++;
         if (j >= count) {
-          await new Future.delayed(const Duration(milliseconds: 10));
+          await new Future<Null>.delayed(const Duration(milliseconds: 10));
           j = 0;
         }
       }

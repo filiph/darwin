@@ -6,7 +6,7 @@ import "dart:async";
 void main() {
   Generation<MyPhenotype, bool, SingleObjectiveResult> firstGeneration;
   MyEvaluator evaluator;
-  GenerationBreeder breeder;
+  GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult> breeder;
   GeneticAlgorithm algo;
 
   group("Genetic algorithm", () {

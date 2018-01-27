@@ -42,9 +42,9 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
         new StreamController<Generation<P, G, R>>();
   }
 
-  Completer _doneCompleter;
-  Future runUntilDone() async {
-    _doneCompleter = new Completer();
+  Completer<Null> _doneCompleter;
+  Future<Null> runUntilDone() async {
+    _doneCompleter = new Completer<Null>();
     await evaluator.init();
     _evaluateNextGeneration();
     return _doneCompleter.future;
@@ -64,7 +64,7 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   final PrintFunction statusf;
 
   void _evaluateNextGeneration() {
-    evaluateLastGeneration().then((_) {
+    evaluateLastGeneration().then((Object _) {
       printf("Applying niching to results.");
       breeder.applyFitnessSharingToResults(generations.last);
       printf("Generation #$currentGeneration evaluation done. Results:");
@@ -149,7 +149,7 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
     }
   }
 
-  Completer _generationCompleter;
+  Completer<Null> _generationCompleter;
 
   /**
    * Evaluates the latest generation and completes when done.

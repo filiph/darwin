@@ -14,8 +14,8 @@ import 'package:meta/meta.dart';
 @experimental
 abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
     G, R extends FitnessResult> extends PhenotypeEvaluator<P, G, R> {
-  final IsolateWorkerPool _pool;
-  final TaskConstructor _taskConstructor;
+  final IsolateWorkerPool<P, R> _pool;
+  final TaskConstructor<P, R> _taskConstructor;
   final FitnessResultCombinator<R> _resultCombinator;
   final R _initialResult;
 
@@ -23,7 +23,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
 
   MultithreadedPhenotypeSerialEvaluator(
       this._taskConstructor, this._resultCombinator, this._initialResult)
-      : _pool = new IsolateWorkerPool();
+      : _pool = new IsolateWorkerPool<P, R>();
 
   @override
   Future init() async {
@@ -42,9 +42,9 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
     int offset = 0;
 
     while (true) {
-      var futures = new List<Future>(BATCH_SIZE);
+      var futures = new List<Future<R>>(BATCH_SIZE);
       for (int i = 0; i < BATCH_SIZE; i++) {
-        IsolateTask task = _taskConstructor(phenotype, offset + i);
+        IsolateTask<P, R> task = _taskConstructor(phenotype, offset + i);
         futures[i] = _pool.send(task);
       }
 
@@ -64,4 +64,5 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
   }
 }
 
-typedef IsolateTask TaskConstructor<T>(T phenotype, int experimentIndex);
+typedef IsolateTask<T, R> TaskConstructor<T, R>(
+    T phenotype, int experimentIndex);
