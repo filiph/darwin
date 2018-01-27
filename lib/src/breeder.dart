@@ -92,6 +92,9 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
       return second;
     }
 
+    assert(!fitnessSharing || first.resultWithFitnessSharingApplied != null);
+    assert(!fitnessSharing || second.resultWithFitnessSharingApplied != null);
+
     if (first.resultWithFitnessSharingApplied != null &&
         second.resultWithFitnessSharingApplied != null) {
       // Fitness sharing was applied. Compare those numbers.
@@ -180,22 +183,20 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   void applyFitnessSharingToResults(Generation<P, G, R> generation) {
     if (fitnessSharing == false) return;
 
-    generation.members.forEach((P ph) {
-      num nicheCount = generation
-          .getSimilarPhenotypes(ph, fitnessSharingRadius)
-          .map((P other) => ph.computeHammingDistance(
-              other)) // XXX: computing hamming distance twice (in getSimilarPhenotypes and here)
-          .fold(
-              0,
-              (num sum, num distance) =>
-                  sum +
-                  (1 -
-                      Math.pow(distance / fitnessSharingRadius,
-                          fitnessSharingAlpha)));
+    for (final ph in generation.members) {
+      final similars =
+          generation.getSimilarPhenotypes(ph, fitnessSharingRadius);
+      double nicheCount = 0.0;
+      for (final other in similars) {
+        // TODO: stop computing hamming distance twice (in getSimilarPhenotypes and here)
+        final distance = ph.computeHammingDistance(other);
+        nicheCount +=
+            1 - Math.pow(distance / fitnessSharingRadius, fitnessSharingAlpha);
+      }
       // The algorithm is modified - we multiply the result instead of
       // dividing it. (Because we count 0.0 as perfect fitness. The smaller
       // the result number, the fitter the phenotype.)
       ph.resultWithFitnessSharingApplied = ph.result.evaluate() * nicheCount;
-    });
+    }
   }
 }

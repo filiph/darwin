@@ -42,7 +42,7 @@ abstract class Phenotype<G, R extends FitnessResult>
    * half-different gene (which would make sense for [num] genes, for example).
    * You should make sure genes have sane equality and [hashCode].
    */
-  num computeHammingDistance(Phenotype<G, R> other) {
+  num computeHammingDistance(covariant Phenotype<G, R> other) {
     int length = genes.length;
     int similarCount = 0;
     for (int i = 0; i < genes.length; i++) {

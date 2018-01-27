@@ -131,6 +131,8 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
     });
   }
 
+  /// Pareto rank according to Konak 2006:
+  /// http://www.eng.auburn.edu/sites/personal/aesmith/files/publications/journal/Multi-objective%20optimization%20using%20genetic%20algorithms.pdf
   void _assignParetoRanks() {
     // No need to do this for single-objective results.
     if (generations.last.members.first is SingleObjectiveResult) return;
