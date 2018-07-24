@@ -1,5 +1,6 @@
-darwin
-======
+# darwin
+
+[![Build Status](https://travis-ci.org/filiph/darwin.svg?branch=master)](https://travis-ci.org/filiph/darwin)
 
 A genetic/evolutionary algorithm library for Dart. Given a population 
 of phenotypes, an evaluator (fitness function), and time, the algorithm
