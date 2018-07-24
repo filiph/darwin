@@ -1,13 +1,13 @@
 name: darwin
-version: 0.4.0
+version: 0.4.1
 description: Genetic algorithm library for Dart.
 author: Filip Hracek <filip.hracek@gmail.com>
 homepage: https://github.com/filiph/darwin
 
 environment:
-    sdk: ">=1.8.0 <2.0.0"
+  sdk: ">=1.24.0 <3.0.0"
 
 dependencies:
-  meta: ^1.1.2
+  meta: ^1.1.6
 dev_dependencies:
-  test: ^0.12.28
+  test: '>=0.12.30 <2.0.0'

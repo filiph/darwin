@@ -169,7 +169,8 @@ class IsolateWorkerPool<T, R> {
 
 void _entryPoint(SendPort sendPort) {
   var port = new ReceivePort();
-  port.listen((IsolateTask task) {
+  port.listen((dynamic message) {
+    IsolateTask task = message;
     task.result = task.execute();
     sendPort.send(task);
   });

@@ -29,7 +29,7 @@ abstract class Phenotype<G, R extends FitnessResult>
 
   toString() => "Phenotype<$genesAsString>";
 
-  String get genesAsString => JSON.encode(genes);
+  String get genesAsString => json.encode(genes);
 
   int compareTo(Phenotype<G, R> other) => this.result.compareTo(other.result);
 

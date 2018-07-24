@@ -3,4 +3,5 @@ packages
 .packages
 .project
 .pub/
+.dart_tool/
 pubspec.lock
