@@ -10,10 +10,8 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   GenerationBreeder(P createBlankPhenotype())
       : createBlankPhenotype = createBlankPhenotype;
 
-  /**
-   * Function that generates blank (or random) phenotypes of type [P]. This
-   * needs to be provided because `new T();` can't be used.
-   */
+  /// Function that generates blank (or random) phenotypes of type [P]. This
+  /// needs to be provided because `new T();` can't be used.
   final P Function() createBlankPhenotype;
 
   num mutationRate =
@@ -25,13 +23,11 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   num fitnessSharingRadius = 0.1;
   num fitnessSharingAlpha = 1;
 
-  /**
-   * Number of best phenotypes that are copied verbatim to next generation.
-   */
+  /// Number of best phenotypes that are copied verbatim to next generation.
   int elitismCount = 1;
 
   Generation<P, G, R> breedNewGeneration(List<Generation<P, G, R>> precursors) {
-    Generation<P, G, R> newGen = new Generation<P, G, R>();
+    Generation<P, G, R> newGen = Generation<P, G, R>();
     // TODO: allow for taking more than the very last generation?
     List<P> pool = precursors.last.members.toList(growable: false);
     assert(pool.every((P ph) => ph.result != null));
@@ -68,15 +64,13 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     return newGen;
   }
 
-  /**
-   * Picks two phenotypes from the pool at random, compares them, and returns
-   * the one with the better fitness.
-   *
-   * TODO: add simulated annealing temperature (probability to pick the worse
-   *       individual) - but is it needed when we have niching?
-   */
+  /// Picks two phenotypes from the pool at random, compares them, and returns
+  /// the one with the better fitness.
+  ///
+  /// TODO: add simulated annealing temperature (probability to pick the worse
+  ///       individual) - but is it needed when we have niching?
   P getRandomTournamentWinner(List<P> pool) {
-    Math.Random random = new Math.Random();
+    Math.Random random = Math.Random();
     P first = pool[random.nextInt(pool.length)];
     P second;
     while (true) {
@@ -116,7 +110,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   void mutate(P phenotype, {num mutationRate, num mutationStrength}) {
     if (mutationRate == null) mutationRate = this.mutationRate;
     if (mutationStrength == null) mutationStrength = this.mutationStrength;
-    Math.Random random = new Math.Random();
+    Math.Random random = Math.Random();
     for (int i = 0; i < phenotype.genes.length; i++) {
       if (random.nextDouble() < mutationRate) {
         phenotype.genes[i] =
@@ -125,36 +119,34 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     }
   }
 
-  /**
-   * Returns a [List] of length 2 (2 children), each having a List of genes
-   * created by crossing over parents' genes.
-   *
-   * The crossover only happens with [crossoverPropability]. Otherwise, exact
-   * copies of parents are returned.
-   */
-  List<List<G>> crossoverParents(P a, P b, {int crossoverPointsCount: 2}) {
-    Math.Random random = new Math.Random();
+  /// Returns a [List] of length 2 (2 children), each having a List of genes
+  /// created by crossing over parents' genes.
+  ///
+  /// The crossover only happens with [crossoverPropability]. Otherwise, exact
+  /// copies of parents are returned.
+  List<List<G>> crossoverParents(P a, P b, {int crossoverPointsCount = 2}) {
+    Math.Random random = Math.Random();
 
     if (random.nextDouble() < (1 - crossoverPropability)) {
       // No crossover. Return genes as they are.
       return [
-        new List.from(a.genes, growable: false),
-        new List.from(b.genes, growable: false)
+        List.from(a.genes, growable: false),
+        List.from(b.genes, growable: false)
       ];
     }
 
     assert(crossoverPointsCount < a.genes.length - 1);
     int length = a.genes.length;
     assert(length == b.genes.length);
-    Set<int> crossoverPoints = new Set<int>();
+    Set<int> crossoverPoints = Set<int>();
 
     // Genes:   0 1 2 3 4 5 6
     // Xpoints:  0 1 2 3 4 5
     while (crossoverPoints.length < crossoverPointsCount) {
       crossoverPoints.add(random.nextInt(length - 1));
     }
-    List<G> child1genes = new List(length);
-    List<G> child2genes = new List(length);
+    List<G> child1genes = List(length);
+    List<G> child2genes = List(length);
     bool crossover = false;
     for (int i = 0; i < length; i++) {
       if (!crossover) {
@@ -171,15 +163,13 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     return [child1genes, child2genes];
   }
 
-  /**
-   * Iterates over [members] and raises their fitness score according to
-   * their uniqueness.
-   *
-   * If [fitnessSharing] is [:false:], doesn't do anything.
-   *
-   * Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
-   * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf
-   */
+  /// Iterates over [members] and raises their fitness score according to
+  /// their uniqueness.
+  ///
+  /// If [fitnessSharing] is [:false:], doesn't do anything.
+  ///
+  /// Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
+  /// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf
   void applyFitnessSharingToResults(Generation<P, G, R> generation) {
     if (fitnessSharing == false) return;
 

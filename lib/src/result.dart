@@ -42,7 +42,7 @@ class SingleObjectiveResult extends FitnessResult {
 
 SingleObjectiveResult singleObjectiveResultCombinator(
     SingleObjectiveResult a, SingleObjectiveResult b) {
-  final result = new SingleObjectiveResult();
+  final result = SingleObjectiveResult();
   result.value = a.value ?? 0.0 + b.value ?? 0.0;
   return result;
 }

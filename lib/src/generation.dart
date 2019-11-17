@@ -4,15 +4,13 @@ import 'package:darwin/src/phenotype.dart';
 import 'package:darwin/src/result.dart';
 
 class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
-  List<P> members = new List<P>();
+  List<P> members = List<P>();
 
-  /**
-   * Filters the generation to phenotypes that are similar to [ph] as defined
-   * by their Hamming distance being less than [radius].
-   *
-   * This _includes_ the original [ph] (Because [ph]'s Hamming distance to
-   * itself is [:0:].)
-   */
+  /// Filters the generation to phenotypes that are similar to [ph] as defined
+  /// by their Hamming distance being less than [radius].
+  ///
+  /// This _includes_ the original [ph] (Because [ph]'s Hamming distance to
+  /// itself is [:0:].)
   Iterable<P> getSimilarPhenotypes(P ph, num radius) {
     return members
         .where((P candidate) => ph.computeHammingDistance(candidate) < radius);
@@ -26,10 +24,8 @@ class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
 
   num bestFitness;
 
-  /**
-   * Computes [cummulativeFitness] and [bestFitness], assuming all members of
-   * the population are scored.
-   */
+  /// Computes [cummulativeFitness] and [bestFitness], assuming all members of
+  /// the population are scored.
   void computeSummary() {
     cummulativeFitness = 0;
     for (final ph in members) {

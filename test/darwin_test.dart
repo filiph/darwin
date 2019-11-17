@@ -13,12 +13,11 @@ void main() {
     // Set up the variables.
     setUp(() {
       // Create first generation.
-      firstGeneration =
-          new Generation<MyPhenotype, bool, SingleObjectiveResult>();
+      firstGeneration = Generation<MyPhenotype, bool, SingleObjectiveResult>();
 
       // Fill it with random phenotypes.
       while (firstGeneration.members.length < 10) {
-        var member = new MyPhenotype.Random();
+        var member = MyPhenotype.Random();
         // Guard against a winning phenotype in first generation.
         if (member.genes.any((gene) => gene == false)) {
           firstGeneration.members.add(member);
@@ -27,15 +26,15 @@ void main() {
 
       // Evaluators take each phenotype and assign a fitness value to it according
       // to some fitness function.
-      evaluator = new MyEvaluator();
+      evaluator = MyEvaluator();
 
       // Breeders are in charge of creating new generations from previous ones (that
       // have been graded by the evaluator).
-      breeder = new GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>(
-          () => new MyPhenotype())
+      breeder = GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>(
+          () => MyPhenotype())
         ..crossoverPropability = 0.8;
 
-      algo = new GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult>(
+      algo = GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult>(
           firstGeneration, evaluator, breeder, printf: (_) {
         return;
       }, statusf: (_) {
@@ -94,17 +93,17 @@ void main() {
   });
 }
 
-Random random = new Random();
+Random random = Random();
 
 class MyEvaluator
     extends PhenotypeEvaluator<MyPhenotype, bool, SingleObjectiveResult> {
   Future<SingleObjectiveResult> evaluate(MyPhenotype phenotype) {
     // This implementation just counts false values - the more false values,
     // the worse outcome of the fitness function.
-    final result = new SingleObjectiveResult();
+    final result = SingleObjectiveResult();
     result.value =
         phenotype.genes.where((bool v) => v == false).length.toDouble();
-    return new Future.value(result);
+    return Future.value(result);
   }
 }
 
@@ -114,7 +113,7 @@ class MyPhenotype extends Phenotype<bool, SingleObjectiveResult> {
   MyPhenotype();
 
   MyPhenotype.Random() {
-    genes = new List<bool>(geneCount);
+    genes = List<bool>(geneCount);
     for (int i = 0; i < geneCount; i++) {
       genes[i] = random.nextBool();
     }

@@ -11,10 +11,8 @@ import 'package:darwin/src/result.dart';
 class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   final int generationSize;
   int MAX_EXPERIMENTS = 20000;
-  /**
-   * When any [Phenotype] scores lower than this, the genetic algorithm
-   * has ended.
-   */
+  /// When any [Phenotype] scores lower than this, the genetic algorithm
+  /// has ended.
   R THRESHOLD_RESULT;
   final int MAX_GENERATIONS_IN_MEMORY = 100;
 
@@ -25,7 +23,7 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
       _onGenerationEvaluatedController.stream;
   StreamController<Generation<P, G, R>> _onGenerationEvaluatedController;
 
-  final generations = new List<Generation<P, G, R>>();
+  final generations = List<Generation<P, G, R>>();
   Iterable<P> get population =>
       generations.expand((Generation<P, G, R> gen) => gen.members);
   final PhenotypeEvaluator<P, G, R> evaluator;
@@ -33,34 +31,29 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
 
   GeneticAlgorithm(
       Generation<P, G, R> firstGeneration, this.evaluator, this.breeder,
-      {this.printf: print, this.statusf: print})
+      {this.printf = print, this.statusf = print})
       : generationSize = firstGeneration.members.length {
     generations.add(firstGeneration);
     evaluator.printf = printf;
 
-    _onGenerationEvaluatedController =
-        new StreamController<Generation<P, G, R>>();
+    _onGenerationEvaluatedController = StreamController<Generation<P, G, R>>();
   }
 
   Completer<Null> _doneCompleter;
   Future<Null> runUntilDone() async {
-    _doneCompleter = new Completer<Null>();
+    _doneCompleter = Completer<Null>();
     await evaluator.init();
     _evaluateNextGeneration();
     return _doneCompleter.future;
   }
 
-  /**
-   * Function used for printing info about the progress of the genetic
-   * algorithm. This is the standard console [print] by default.
-   */
+  /// Function used for printing info about the progress of the genetic
+  /// algorithm. This is the standard console [print] by default.
   final PrintFunction printf;
-  /**
-   * Function used for showing status of the genetic algorithm, with the
-   * assumption that previous status text is rewritten by new status text.
-   * This is also initialized with [print] by default, but that's not
-   * the ideal implementation.
-   */
+  /// Function used for showing status of the genetic algorithm, with the
+  /// assumption that previous status text is rewritten by new status text.
+  /// This is also initialized with [print] by default, but that's not
+  /// the ideal implementation.
   final PrintFunction statusf;
 
   void _evaluateNextGeneration() {
@@ -151,14 +144,12 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
 
   Completer<Null> _generationCompleter;
 
-  /**
-   * Evaluates the latest generation and completes when done.
-   *
-   * TODO: Allow for multiple members being evaluated in parallel via
-   * isolates.
-   */
+  /// Evaluates the latest generation and completes when done.
+  ///
+  /// TODO: Allow for multiple members being evaluated in parallel via
+  /// isolates.
   Future evaluateLastGeneration() {
-    _generationCompleter = new Completer();
+    _generationCompleter = Completer();
 
     memberIndex = 0;
     _evaluateNextGenerationMember();
@@ -167,4 +158,4 @@ BEST ${generations.last.bestFitness.toStringAsFixed(2)}
   }
 }
 
-typedef void PrintFunction(Object o);
+typedef PrintFunction = void Function(Object o);

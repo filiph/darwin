@@ -8,9 +8,7 @@ import 'package:darwin/isolate_worker.dart';
 import 'package:darwin/src/result.dart';
 import 'package:meta/meta.dart';
 
-/**
- * For use when multiple experiments should be done with each phenotype.
- */
+/// For use when multiple experiments should be done with each phenotype.
 @experimental
 abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
     G, R extends FitnessResult> extends PhenotypeEvaluator<P, G, R> {
@@ -23,7 +21,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
 
   MultithreadedPhenotypeSerialEvaluator(
       this._taskConstructor, this._resultCombinator, this._initialResult)
-      : _pool = new IsolateWorkerPool<P, R>();
+      : _pool = IsolateWorkerPool<P, R>();
 
   @override
   Future init() async {
@@ -42,7 +40,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
     int offset = 0;
 
     while (true) {
-      var futures = new List<Future<R>>(BATCH_SIZE);
+      var futures = List<Future<R>>(BATCH_SIZE);
       for (int i = 0; i < BATCH_SIZE; i++) {
         IsolateTask<P, R> task = _taskConstructor(phenotype, offset + i);
         futures[i] = _pool.send(task);
@@ -64,5 +62,5 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
   }
 }
 
-typedef IsolateTask<T, R> TaskConstructor<T, R>(
+typedef TaskConstructor<T, R> = IsolateTask<T, R> Function(
     T phenotype, int experimentIndex);

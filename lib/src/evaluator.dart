@@ -19,21 +19,17 @@ abstract class PhenotypeEvaluator<P extends Phenotype<G, R>, G,
   /// nothing.
   void destroy() {}
 
-  /**
-   * Evaluate takes the phenotype and returns its fitness score. The lower the
-   * fitness score, the better the phenotype. Fitness score of [:0.0:] means
-   * that the phenotype is perfect.
-   */
+  /// Evaluate takes the phenotype and returns its fitness score. The lower the
+  /// fitness score, the better the phenotype. Fitness score of [:0.0:] means
+  /// that the phenotype is perfect.
   Future<R> evaluate(P phenotype);
 
   /// When evaluators need some work for initialization. By default,
   /// this just returns an immediate [Future].
-  Future init() => new Future<Null>.value();
+  Future init() => Future<Null>.value();
 }
 
-/**
- * For use when multiple experiments should be done with each phenotype.
- */
+/// For use when multiple experiments should be done with each phenotype.
 abstract class PhenotypeSerialEvaluator<P extends Phenotype<G, R>, G,
     R extends FitnessResult> extends PhenotypeEvaluator<P, G, R> {
   final FitnessResultCombinator<R> _resultCombinator;
@@ -48,16 +44,14 @@ abstract class PhenotypeSerialEvaluator<P extends Phenotype<G, R>, G,
     printf("Evaluating $phenotype");
     cummulativeResult = _initialResult;
     userData = null;
-    _completer = new Completer<R>();
+    _completer = Completer<R>();
     _next(phenotype, 0);
     return _completer.future;
   }
 
-  /**
-   * Runs one of the experiments to be performed on the given [phenotype].
-   * Should complete with the result of the [IterativeFitnessFunction], or with
-   * [:null:] when there are no other experiments to run.
-   */
+  /// Runs one of the experiments to be performed on the given [phenotype].
+  /// Should complete with the result of the [IterativeFitnessFunction], or with
+  /// [:null:] when there are no other experiments to run.
   Future<R> runOneEvaluation(P phenotype, int experimentIndex);
 
   void _next(P phenotype, int experimentIndex) {
