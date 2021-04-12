@@ -107,25 +107,25 @@ class IsolateWorker<T, R> {
 /// It's recommended that [count] is less or equal to the number of CPU cores.
 class IsolateWorkerPool<T, R> {
   final int count;
-  final List<IsolateWorker<T, R>?> _workers;
+  late final List<IsolateWorker<T, R>> _workers;
 
   bool _initialized = false;
 
-  IsolateWorkerPool({int count = 4})
-      : count = count,
-        _workers = List.filled(count, null);
+  IsolateWorkerPool({int count = 4}) : count = count;
 
   Future init() async {
-    for (var i = 0; i < count; i++) {
+    var futures =
+        List<Future<IsolateWorker<T, R>>>.generate(count, (index) async {
       var worker = IsolateWorker<T, R>();
       await worker.init();
-      _workers[i] = worker;
-    }
+      return worker;
+    });
+    _workers = await Future.wait(futures);
     _initialized = true;
   }
 
   void destroy() {
-    _workers.forEach((w) => w!.destroy());
+    _workers.forEach((w) => w.destroy());
   }
 
   static final Random _random = Random();
@@ -134,7 +134,7 @@ class IsolateWorkerPool<T, R> {
     if (!_initialized) {
       throw StateError('Must run init() first before using pool.');
     }
-    var worker = _workers[_random.nextInt(count)]!;
+    var worker = _workers[_random.nextInt(count)];
 
     while (worker.isTooBusy) {
       await Future<Null>.delayed(const Duration(milliseconds: 10));
@@ -151,14 +151,14 @@ class IsolateWorkerPool<T, R> {
     while (i < tasks.length) {
       var task = tasks[i];
       var j = 0;
-      while (_workers[j]!.isTooBusy) {
+      while (_workers[j].isTooBusy) {
         j++;
         if (j >= count) {
           await Future<Null>.delayed(const Duration(milliseconds: 10));
           j = 0;
         }
       }
-      futures[i] = _workers[j]!.send(task);
+      futures[i] = _workers[j].send(task);
       i++;
       j++;
     }
