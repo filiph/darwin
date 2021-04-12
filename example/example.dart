@@ -31,19 +31,20 @@ Future<Null> main() async {
 
   // Print all members of the last generation when done.
   algo.generations.last.members
-      .forEach((Phenotype ph) => print("${ph.genesAsString}"));
+      .forEach((Phenotype ph) => print('${ph.genesAsString}'));
 }
 
 Random random = Random();
 
 class MyEvaluator
     extends PhenotypeEvaluator<MyPhenotype, bool, SingleObjectiveResult> {
+  @override
   Future<SingleObjectiveResult> evaluate(MyPhenotype phenotype) {
     // This implementation just counts false values - the more false values,
     // the worse outcome of the fitness function.
     final result = SingleObjectiveResult();
     result.value =
-        phenotype.genes.where((bool v) => v == false).length.toDouble();
+        phenotype.genes!.where((bool v) => v == false).length.toDouble();
     return Future.value(result);
   }
 }
@@ -54,12 +55,10 @@ class MyPhenotype extends Phenotype<bool, SingleObjectiveResult> {
   MyPhenotype();
 
   MyPhenotype.Random() {
-    genes = List<bool>(geneCount);
-    for (int i = 0; i < geneCount; i++) {
-      genes[i] = random.nextBool();
-    }
+    genes = List.generate(geneCount, (index) => random.nextBool());
   }
 
+  @override
   bool mutateGene(bool gene, num strength) {
     return !gene;
   }

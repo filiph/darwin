@@ -18,17 +18,19 @@ import 'package:darwin/src/result.dart';
 /// strength.
 abstract class Phenotype<G, R extends FitnessResult>
     implements Comparable<Phenotype<G, R>> {
-  List<G> genes;
-  R result = null;
-  num resultWithFitnessSharingApplied = null;
+  List<G>? genes;
+  R? result;
+  num? resultWithFitnessSharingApplied;
 
   G mutateGene(G gene, num strength);
 
-  toString() => "Phenotype<$genesAsString>";
+  @override
+  String toString() => 'Phenotype<$genesAsString>';
 
   String get genesAsString => json.encode(genes);
 
-  int compareTo(Phenotype<G, R> other) => this.result.compareTo(other.result);
+  @override
+  int compareTo(Phenotype<G, R> other) => result!.compareTo(other.result!);
 
   /// Returns the degree to which this chromosome has dissimilar genes with the
   /// other. If chromosomes are identical, returns [:0.0:]. If all genes are
@@ -38,10 +40,10 @@ abstract class Phenotype<G, R extends FitnessResult>
   /// half-different gene (which would make sense for [num] genes, for example).
   /// You should make sure genes have sane equality and [hashCode].
   num computeHammingDistance(covariant Phenotype<G, R> other) {
-    int length = genes.length;
-    int similarCount = 0;
-    for (int i = 0; i < genes.length; i++) {
-      if (genes[i] == other.genes[i]) {
+    var length = genes!.length;
+    var similarCount = 0;
+    for (var i = 0; i < genes!.length; i++) {
+      if (genes![i] == other.genes![i]) {
         similarCount++;
       }
     }
