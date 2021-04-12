@@ -18,7 +18,7 @@ import 'package:darwin/src/result.dart';
 /// strength.
 abstract class Phenotype<G, R extends FitnessResult>
     implements Comparable<Phenotype<G, R>> {
-  List<G>? genes;
+  late List<G> genes;
   R? result;
   num? resultWithFitnessSharingApplied;
 
@@ -40,10 +40,10 @@ abstract class Phenotype<G, R extends FitnessResult>
   /// half-different gene (which would make sense for [num] genes, for example).
   /// You should make sure genes have sane equality and [hashCode].
   num computeHammingDistance(covariant Phenotype<G, R> other) {
-    var length = genes!.length;
+    var length = genes.length;
     var similarCount = 0;
-    for (var i = 0; i < genes!.length; i++) {
-      if (genes![i] == other.genes![i]) {
+    for (var i = 0; i < genes.length; i++) {
+      if (genes[i] == other.genes[i]) {
         similarCount++;
       }
     }

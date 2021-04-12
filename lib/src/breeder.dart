@@ -48,7 +48,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
       var child1 = createBlankPhenotype();
       var child2 = createBlankPhenotype();
       var childrenGenes = crossoverParents(parent1, parent2,
-          crossoverPointsCount: parent1.genes!.length ~/ 2);
+          crossoverPointsCount: parent1.genes.length ~/ 2);
       child1.genes = childrenGenes[0];
       child2.genes = childrenGenes[1];
       newGen.members.add(child1);
@@ -111,10 +111,10 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     mutationRate ??= this.mutationRate;
     mutationStrength ??= this.mutationStrength;
     var random = math.Random();
-    for (var i = 0; i < phenotype.genes!.length; i++) {
+    for (var i = 0; i < phenotype.genes.length; i++) {
       if (random.nextDouble() < mutationRate) {
-        phenotype.genes![i] =
-            phenotype.mutateGene(phenotype.genes![i], mutationStrength);
+        phenotype.genes[i] =
+            phenotype.mutateGene(phenotype.genes[i], mutationStrength);
       }
     }
   }
@@ -130,14 +130,14 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     if (random.nextDouble() < (1 - crossoverPropability)) {
       // No crossover. Return genes as they are.
       return [
-        List.from(a.genes!, growable: false),
-        List.from(b.genes!, growable: false)
+        List.from(a.genes, growable: false),
+        List.from(b.genes, growable: false)
       ];
     }
 
-    assert(crossoverPointsCount < a.genes!.length - 1);
-    var length = a.genes!.length;
-    assert(length == b.genes!.length);
+    assert(crossoverPointsCount < a.genes.length - 1);
+    var length = a.genes.length;
+    assert(length == b.genes.length);
     var crossoverPoints = <int>{};
 
     // Genes:   0 1 2 3 4 5 6
@@ -150,11 +150,11 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     var crossover = false;
     for (var i = 0; i < length; i++) {
       if (!crossover) {
-        child1genes[i] = a.genes![i];
-        child2genes[i] = b.genes![i];
+        child1genes[i] = a.genes[i];
+        child2genes[i] = b.genes[i];
       } else {
-        child1genes[i] = b.genes![i];
-        child2genes[i] = a.genes![i];
+        child1genes[i] = b.genes[i];
+        child2genes[i] = a.genes[i];
       }
       if (crossoverPoints.contains(i)) {
         crossover = !crossover;

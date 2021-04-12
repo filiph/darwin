@@ -19,7 +19,7 @@ void main() {
       while (firstGeneration.members.length < 10) {
         var member = MyPhenotype.Random();
         // Guard against a winning phenotype in first generation.
-        if (member.genes!.any((gene) => gene == false)) {
+        if (member.genes.any((gene) => gene == false)) {
           firstGeneration.members.add(member);
         }
       }
@@ -103,7 +103,7 @@ class MyEvaluator
     // the worse outcome of the fitness function.
     final result = SingleObjectiveResult();
     result.value =
-        phenotype.genes!.where((bool v) => v == false).length.toDouble();
+        phenotype.genes.where((bool v) => v == false).length.toDouble();
     return Future.value(result);
   }
 }
