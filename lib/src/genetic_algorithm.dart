@@ -64,9 +64,6 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
       printf('Applying niching to results.');
       breeder!.applyFitnessSharingToResults(generations.last);
       printf('Generation #$currentGeneration evaluation done. Results:');
-      // generations.last.members.forEach((P member) {
-      //   printf("- ${member.result.toStringAsFixed(2)}");
-      // });
       printf('- ${generations.last.averageFitness!.toStringAsFixed(2)} AVG');
       printf('- ${generations.last.bestFitness!.toStringAsFixed(2)} BEST');
       statusf('''
