@@ -1,13 +1,13 @@
 library darwin.breeder;
 
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 import 'package:darwin/src/phenotype.dart';
 import 'package:darwin/src/generation.dart';
 import 'package:darwin/src/result.dart';
 
 class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
-  GenerationBreeder(P createBlankPhenotype())
+  GenerationBreeder(P Function() createBlankPhenotype)
       : createBlankPhenotype = createBlankPhenotype;
 
   /// Function that generates blank (or random) phenotypes of type [P]. This
@@ -27,27 +27,27 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   int elitismCount = 1;
 
   Generation<P, G, R> breedNewGeneration(List<Generation<P, G, R>> precursors) {
-    Generation<P, G, R> newGen = Generation<P, G, R>();
+    var newGen = Generation<P, G, R>();
     // TODO: allow for taking more than the very last generation?
-    List<P> pool = precursors.last.members.toList(growable: false);
+    var pool = precursors.last.members.toList(growable: false);
     assert(pool.every((P ph) => ph.result != null));
-    pool.sort((P a, P b) => (a.result.compareTo(b.result)));
-    int length = precursors.last.members.length;
+    pool.sort((P a, P b) => (a.result!.compareTo(b.result!)));
+    var length = precursors.last.members.length;
 
     // Elitism
-    for (int i = 0; i < elitismCount; i++) {
-      P clone1 = createBlankPhenotype();
+    for (var i = 0; i < elitismCount; i++) {
+      var clone1 = createBlankPhenotype();
       clone1.genes = pool[i].genes;
       newGen.members.add(clone1);
     }
 
     // Crossover breeding
     while (newGen.members.length < length) {
-      P parent1 = getRandomTournamentWinner(pool);
-      P parent2 = getRandomTournamentWinner(pool);
-      P child1 = createBlankPhenotype();
-      P child2 = createBlankPhenotype();
-      List<List<G>> childrenGenes = crossoverParents(parent1, parent2,
+      var parent1 = getRandomTournamentWinner(pool);
+      var parent2 = getRandomTournamentWinner(pool);
+      var child1 = createBlankPhenotype();
+      var child2 = createBlankPhenotype();
+      var childrenGenes = crossoverParents(parent1, parent2,
           crossoverPointsCount: parent1.genes.length ~/ 2);
       child1.genes = childrenGenes[0];
       child2.genes = childrenGenes[1];
@@ -70,8 +70,8 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// TODO: add simulated annealing temperature (probability to pick the worse
   ///       individual) - but is it needed when we have niching?
   P getRandomTournamentWinner(List<P> pool) {
-    Math.Random random = Math.Random();
-    P first = pool[random.nextInt(pool.length)];
+    var random = math.Random();
+    var first = pool[random.nextInt(pool.length)];
     P second;
     while (true) {
       second = pool[random.nextInt(pool.length)];
@@ -80,9 +80,9 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     assert(first.result != null);
     assert(second.result != null);
 
-    if (first.result.paretoRank < second.result.paretoRank) {
+    if (first.result!.paretoRank < second.result!.paretoRank) {
       return first;
-    } else if (first.result.paretoRank > second.result.paretoRank) {
+    } else if (first.result!.paretoRank > second.result!.paretoRank) {
       return second;
     }
 
@@ -92,26 +92,26 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     if (first.resultWithFitnessSharingApplied != null &&
         second.resultWithFitnessSharingApplied != null) {
       // Fitness sharing was applied. Compare those numbers.
-      if (first.resultWithFitnessSharingApplied <
-          second.resultWithFitnessSharingApplied) {
+      if (first.resultWithFitnessSharingApplied! <
+          second.resultWithFitnessSharingApplied!) {
         return first;
       } else {
         return second;
       }
     }
 
-    if (first.result.compareTo(second.result) < 0) {
+    if (first.result!.compareTo(second.result!) < 0) {
       return first;
     } else {
       return second;
     }
   }
 
-  void mutate(P phenotype, {num mutationRate, num mutationStrength}) {
-    if (mutationRate == null) mutationRate = this.mutationRate;
-    if (mutationStrength == null) mutationStrength = this.mutationStrength;
-    Math.Random random = Math.Random();
-    for (int i = 0; i < phenotype.genes.length; i++) {
+  void mutate(P phenotype, {num? mutationRate, num? mutationStrength}) {
+    mutationRate ??= this.mutationRate;
+    mutationStrength ??= this.mutationStrength;
+    var random = math.Random();
+    for (var i = 0; i < phenotype.genes.length; i++) {
       if (random.nextDouble() < mutationRate) {
         phenotype.genes[i] =
             phenotype.mutateGene(phenotype.genes[i], mutationStrength);
@@ -125,7 +125,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// The crossover only happens with [crossoverPropability]. Otherwise, exact
   /// copies of parents are returned.
   List<List<G>> crossoverParents(P a, P b, {int crossoverPointsCount = 2}) {
-    Math.Random random = Math.Random();
+    var random = math.Random();
 
     if (random.nextDouble() < (1 - crossoverPropability)) {
       // No crossover. Return genes as they are.
@@ -136,19 +136,19 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     }
 
     assert(crossoverPointsCount < a.genes.length - 1);
-    int length = a.genes.length;
+    var length = a.genes.length;
     assert(length == b.genes.length);
-    Set<int> crossoverPoints = Set<int>();
+    var crossoverPoints = <int>{};
 
     // Genes:   0 1 2 3 4 5 6
     // Xpoints:  0 1 2 3 4 5
     while (crossoverPoints.length < crossoverPointsCount) {
       crossoverPoints.add(random.nextInt(length - 1));
     }
-    List<G> child1genes = List(length);
-    List<G> child2genes = List(length);
-    bool crossover = false;
-    for (int i = 0; i < length; i++) {
+    var child1genes = List<G?>.filled(length, null);
+    var child2genes = List<G?>.filled(length, null);
+    var crossover = false;
+    for (var i = 0; i < length; i++) {
       if (!crossover) {
         child1genes[i] = a.genes[i];
         child2genes[i] = b.genes[i];
@@ -160,7 +160,10 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
         crossover = !crossover;
       }
     }
-    return [child1genes, child2genes];
+    return [
+      List<G>.from(child1genes, growable: false),
+      List<G>.from(child2genes, growable: false)
+    ];
   }
 
   /// Iterates over [members] and raises their fitness score according to
@@ -176,17 +179,17 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     for (final ph in generation.members) {
       final similars =
           generation.getSimilarPhenotypes(ph, fitnessSharingRadius);
-      double nicheCount = 0.0;
+      var nicheCount = 0.0;
       for (final other in similars) {
         // TODO: stop computing hamming distance twice (in getSimilarPhenotypes and here)
         final distance = ph.computeHammingDistance(other);
         nicheCount +=
-            1 - Math.pow(distance / fitnessSharingRadius, fitnessSharingAlpha);
+            1 - math.pow(distance / fitnessSharingRadius, fitnessSharingAlpha);
       }
       // The algorithm is modified - we multiply the result instead of
       // dividing it. (Because we count 0.0 as perfect fitness. The smaller
       // the result number, the fitter the phenotype.)
-      ph.resultWithFitnessSharingApplied = ph.result.evaluate() * nicheCount;
+      ph.resultWithFitnessSharingApplied = ph.result!.evaluate()! * nicheCount;
     }
   }
 }

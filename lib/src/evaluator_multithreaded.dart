@@ -33,21 +33,20 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
     _pool.destroy();
   }
 
+  @override
   Future<R> evaluate(P phenotype) async {
-    printf("Evaluating $phenotype");
+    printf('Evaluating $phenotype');
 
-    R cumulativeResult = _initialResult;
-    int offset = 0;
+    var cumulativeResult = _initialResult;
+    var offset = 0;
 
     while (true) {
-      var futures = List<Future<R>>(BATCH_SIZE);
-      for (int i = 0; i < BATCH_SIZE; i++) {
-        IsolateTask<P, R> task = _taskConstructor(phenotype, offset + i);
-        futures[i] = _pool.send(task);
-      }
+      var futures = List<Future<R?>>.generate(
+        BATCH_SIZE,
+        (i) => _pool.send(_taskConstructor(phenotype, offset + i)),
+      );
 
-      List<R> results = await Future.wait(futures);
-      // print(results);
+      var results = await Future.wait(futures);
       for (final result in results) {
         if (result == null) continue;
         cumulativeResult = _resultCombinator(cumulativeResult, result);

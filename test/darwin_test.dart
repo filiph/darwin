@@ -1,15 +1,15 @@
-import "package:test/test.dart";
-import "package:darwin/darwin.dart";
-import "dart:math";
-import "dart:async";
+import 'package:test/test.dart';
+import 'package:darwin/darwin.dart';
+import 'dart:math';
+import 'dart:async';
 
 void main() {
   Generation<MyPhenotype, bool, SingleObjectiveResult> firstGeneration;
   MyEvaluator evaluator;
-  GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult> breeder;
-  GeneticAlgorithm algo;
+  GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>? breeder;
+  late GeneticAlgorithm algo;
 
-  group("Genetic algorithm", () {
+  group('Genetic algorithm', () {
     // Set up the variables.
     setUp(() {
       // Create first generation.
@@ -42,13 +42,13 @@ void main() {
       });
     });
 
-    test("terminates", () async {
+    test('terminates', () async {
       // Start the algorithm.
       await algo.runUntilDone();
       expect(algo.currentGeneration, greaterThan(0));
     });
 
-    test("converges to better fitness", () async {
+    test('converges to better fitness', () async {
       // Start the algorithm.
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
@@ -56,8 +56,8 @@ void main() {
           greaterThanOrEqualTo(algo.generations.last.bestFitness));
     });
 
-    test("works without fitness sharing", () async {
-      breeder.fitnessSharing = false;
+    test('works without fitness sharing', () async {
+      breeder!.fitnessSharing = false;
       // Start the algorithm.
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
@@ -65,8 +65,8 @@ void main() {
           greaterThanOrEqualTo(algo.generations.last.bestFitness));
     });
 
-    test("works without elitism", () async {
-      breeder.elitismCount = 0;
+    test('works without elitism', () async {
+      breeder!.elitismCount = 0;
       // Start the algorithm.
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
@@ -74,7 +74,7 @@ void main() {
           greaterThanOrEqualTo(algo.generations.last.bestFitness));
     });
 
-    test("onGenerationEvaluatedController works", () async {
+    test('onGenerationEvaluatedController works', () async {
       // Register the hook;
       algo.onGenerationEvaluated.listen((Generation g) {
         expect(g.averageFitness, isNotNull);
@@ -82,10 +82,10 @@ void main() {
       });
 
       // Start the algorithm.
-      algo.runUntilDone();
+      await algo.runUntilDone();
     });
 
-    test("Generation.best is assigned to last generation after done", () async {
+    test('Generation.best is assigned to last generation after done', () async {
       // Start the algorithm.
       await algo.runUntilDone();
       expect(algo.generations.last.best, isNotNull);
@@ -97,6 +97,7 @@ Random random = Random();
 
 class MyEvaluator
     extends PhenotypeEvaluator<MyPhenotype, bool, SingleObjectiveResult> {
+  @override
   Future<SingleObjectiveResult> evaluate(MyPhenotype phenotype) {
     // This implementation just counts false values - the more false values,
     // the worse outcome of the fitness function.
@@ -113,12 +114,10 @@ class MyPhenotype extends Phenotype<bool, SingleObjectiveResult> {
   MyPhenotype();
 
   MyPhenotype.Random() {
-    genes = List<bool>(geneCount);
-    for (int i = 0; i < geneCount; i++) {
-      genes[i] = random.nextBool();
-    }
+    genes = List<bool>.generate(geneCount, (index) => random.nextBool());
   }
 
+  @override
   bool mutateGene(bool gene, num strength) {
     return !gene;
   }

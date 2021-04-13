@@ -1,6 +1,6 @@
 library darwin.evaluator;
 
-import "dart:async";
+import 'dart:async';
 
 import 'package:darwin/src/genetic_algorithm.dart';
 import 'package:darwin/src/phenotype.dart';
@@ -9,8 +9,8 @@ import 'package:darwin/src/result.dart';
 // TODO: can be implemented as an Isolate
 abstract class PhenotypeEvaluator<P extends Phenotype<G, R>, G,
     R extends FitnessResult> {
-  Object userData;
-  Completer<R> _completer;
+  Object? userData;
+  late Completer<R> _completer;
 
   /// Set automatically by [GeneticAlgorithm].
   PrintFunction printf = print;
@@ -34,14 +34,15 @@ abstract class PhenotypeSerialEvaluator<P extends Phenotype<G, R>, G,
     R extends FitnessResult> extends PhenotypeEvaluator<P, G, R> {
   final FitnessResultCombinator<R> _resultCombinator;
 
-  R cummulativeResult;
+  late R cummulativeResult;
 
   final R _initialResult;
 
   PhenotypeSerialEvaluator(this._resultCombinator, this._initialResult);
 
+  @override
   Future<R> evaluate(P phenotype) {
-    printf("Evaluating $phenotype");
+    printf('Evaluating $phenotype');
     cummulativeResult = _initialResult;
     userData = null;
     _completer = Completer<R>();
@@ -55,18 +56,18 @@ abstract class PhenotypeSerialEvaluator<P extends Phenotype<G, R>, G,
   Future<R> runOneEvaluation(P phenotype, int experimentIndex);
 
   void _next(P phenotype, int experimentIndex) {
-    runOneEvaluation(phenotype, experimentIndex).then((R result) {
+    runOneEvaluation(phenotype, experimentIndex).then((R? result) {
       if (result == null) {
-        printf("Cummulative result for phenotype: $cummulativeResult");
+        printf('Cummulative result for phenotype: $cummulativeResult');
         _completer.complete(cummulativeResult);
-      } else if (result.evaluate().isInfinite) {
+      } else if (result.evaluate()!.isInfinite) {
         printf(
-            "Result for experiment #$experimentIndex: FAIL\nFailing phenotype");
+            'Result for experiment #$experimentIndex: FAIL\nFailing phenotype');
         _completer.complete(cummulativeResult);
       } else {
         cummulativeResult = _resultCombinator(cummulativeResult, result);
         printf(
-            "Result for experiment: $result (cummulative: $cummulativeResult)");
+            'Result for experiment: $result (cummulative: $cummulativeResult)');
         _next(phenotype, experimentIndex + 1);
       }
     });

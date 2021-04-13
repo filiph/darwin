@@ -1,5 +1,5 @@
 name: darwin
-version: 0.4.1
+version: 0.5.0
 description: >
   A genetic/evolutionary algorithm library for Dart. Given a population
   of phenotypes, an evaluator (fitness function), and time, the algorithm
@@ -8,9 +8,11 @@ author: Filip Hracek <filip.hracek@gmail.com>
 homepage: https://github.com/filiph/darwin
 
 environment:
-  sdk: ">=1.24.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   meta: ^1.1.6
+
 dev_dependencies:
-  test: '>=0.12.30 <2.0.0'
+  pedantic: ^1.11.0
+  test: ^1.0.0
