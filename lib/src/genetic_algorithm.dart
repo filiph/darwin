@@ -58,6 +58,7 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// the ideal implementation.
   final PrintFunction statusf;
 
+  // TODO(filiph): Rewrite to async function
   void _evaluateNextGeneration() {
     evaluateLastGeneration().then<void>((dynamic _) {
       printf('Applying niching to results.');
