@@ -60,7 +60,7 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
 
   // TODO(filiph): Rewrite to async function
   void _evaluateNextGeneration() {
-    evaluateLastGeneration().then<void>((dynamic _) {
+    evaluateLastGeneration().then<void>((_) {
       printf('Applying niching to results.');
       breeder!.applyFitnessSharingToResults(generations.last);
       printf('Generation #$currentGeneration evaluation done. Results:');
