@@ -145,7 +145,6 @@ class IsolateWorkerPool<T, R> {
     List<Future<R?>?> futures = List<Future<R>?>.filled(tasks.length, null);
     var i = 0;
 
-    // int done = 0;
     while (i < tasks.length) {
       var task = tasks[i];
       var j = 0;
