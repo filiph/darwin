@@ -67,7 +67,6 @@ class IsolateWorker<T, R> {
   IsolateWorker();
 
   Future<Null> init() async {
-    if (_ready) return Future.value();
     var completer = Completer<Null>();
 
     receivePort = ReceivePort();
