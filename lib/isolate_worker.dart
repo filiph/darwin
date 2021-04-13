@@ -61,7 +61,6 @@ class IsolateWorker<T, R> {
   bool get isBusy => _completers.isNotEmpty;
   static const int MAX_QUEUE = 100;
   bool get isTooBusy => queueLength > MAX_QUEUE;
-  bool _ready = false; // TODO(filiph): This should be modified somewhere.
   late StreamSubscription _portSubscription;
 
   // Worker(ReceivePort receivePort) : receivePort = receivePort;
