@@ -150,7 +150,7 @@ class IsolateWorkerPool<T, R> {
       while (_workers[j].isTooBusy) {
         j++;
         if (j >= count) {
-          await Future<Null>.delayed(const Duration(milliseconds: 10));
+          await Future<void>.delayed(const Duration(milliseconds: 10));
           j = 0;
         }
       }
