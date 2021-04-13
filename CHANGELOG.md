@@ -1,3 +1,6 @@
+## 0.5.0
+ - Null Safety migration
+
 ## 0.4.2
 
 - Resolve implicit cast problem
