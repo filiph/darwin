@@ -142,7 +142,6 @@ class IsolateWorkerPool<T, R> {
   }
 
   Future<List<R?>> sendMany(List<IsolateTask<T, R>> tasks) async {
-    // return Future.wait(tasks.map((t) => send(t)));
     List<Future<R?>?> futures = List<Future<R>?>.filled(tasks.length, null);
     var i = 0;
 
