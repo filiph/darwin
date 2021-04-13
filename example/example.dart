@@ -18,7 +18,7 @@ Future<Null> main() async {
   // a function that returns a blank phenotype.
   var breeder = GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>(
       () => MyPhenotype())
-    ..crossoverPropability = 0.8;
+    ..crossoverProbability = 0.8;
 
   var algo = GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult>(
     firstGeneration,

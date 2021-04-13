@@ -17,7 +17,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   num mutationRate =
       0.01; // 0.01 means that every gene has 1% probability of mutating
   num mutationStrength = 1.0; // 1.0 means any value can become any other value
-  num crossoverPropability = 1.0;
+  num crossoverProbability = 1.0;
 
   bool fitnessSharing = true;
   num fitnessSharingRadius = 0.1;
@@ -28,7 +28,6 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
 
   Generation<P, G, R> breedNewGeneration(List<Generation<P, G, R>> precursors) {
     var newGen = Generation<P, G, R>();
-    // TODO: allow for taking more than the very last generation?
     var pool = precursors.last.members.toList(growable: false);
     assert(pool.every((P ph) => ph.result != null));
     pool.sort((P a, P b) => (a.result!.compareTo(b.result!)));
@@ -122,12 +121,16 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// Returns a [List] of length 2 (2 children), each having a List of genes
   /// created by crossing over parents' genes.
   ///
-  /// The crossover only happens with [crossoverPropability]. Otherwise, exact
+  /// By default, the "chromosomes" are cut and crossed over at 2 random points,
+  /// like in human DNA. You can tweak this by specifying a different
+  /// [crossoverPointsCount].
+  ///
+  /// The crossover only happens with [crossoverProbability]. Otherwise, exact
   /// copies of parents are returned.
   List<List<G>> crossoverParents(P a, P b, {int crossoverPointsCount = 2}) {
     var random = math.Random();
 
-    if (random.nextDouble() < (1 - crossoverPropability)) {
+    if (random.nextDouble() < (1 - crossoverProbability)) {
       // No crossover. Return genes as they are.
       return [
         List.from(a.genes, growable: false),
@@ -181,7 +184,8 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
           generation.getSimilarPhenotypes(ph, fitnessSharingRadius);
       var nicheCount = 0.0;
       for (final other in similars) {
-        // TODO: stop computing hamming distance twice (in getSimilarPhenotypes and here)
+        // TODO: stop computing hamming distance twice (in getSimilarPhenotypes
+        //       and here)
         final distance = ph.computeHammingDistance(other);
         nicheCount +=
             1 - math.pow(distance / fitnessSharingRadius, fitnessSharingAlpha);

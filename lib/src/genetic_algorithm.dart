@@ -10,12 +10,12 @@ import 'package:darwin/src/result.dart';
 
 class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   final int generationSize;
-  int MAX_EXPERIMENTS = 20000;
+  int maxExperiments = 20000;
 
   /// When any [Phenotype] scores lower than this, the genetic algorithm
   /// has ended.
-  R? THRESHOLD_RESULT;
-  final int MAX_GENERATIONS_IN_MEMORY = 100;
+  R? thresholdResult;
+  final int maxGenerationsInMemory = 100;
 
   int currentExperiment = 0;
   int currentGeneration = 0;
@@ -40,9 +40,9 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     _onGenerationEvaluatedController = StreamController<Generation<P, G, R>>();
   }
 
-  late Completer<Null> _doneCompleter;
-  Future<Null> runUntilDone() async {
-    _doneCompleter = Completer<Null>();
+  late Completer<void> _doneCompleter;
+  Future<void> runUntilDone() async {
+    _doneCompleter = Completer<void>();
     await evaluator.init();
     _evaluateNextGeneration();
     return _doneCompleter.future;
@@ -58,7 +58,7 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// the ideal implementation.
   final PrintFunction statusf;
 
-  // TODO(filiph): Rewrite to async function
+  // TODO(filiph): Rewrite to async functions instead of a bunch of Completers
   void _evaluateNextGeneration() {
     evaluateLastGeneration().then<void>((dynamic _) {
       printf('Applying niching to results.');
@@ -73,15 +73,15 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
 ''');
       printf('---');
       _onGenerationEvaluatedController.add(generations.last);
-      if (currentExperiment >= MAX_EXPERIMENTS) {
+      if (currentExperiment >= maxExperiments) {
         printf('All experiments done ($currentExperiment)');
         _doneCompleter.complete();
         evaluator.destroy();
         return;
       }
-      if (THRESHOLD_RESULT != null &&
+      if (thresholdResult != null &&
           generations.last.members
-              .any((P ph) => ph.result!.compareTo(THRESHOLD_RESULT!) < 0)) {
+              .any((P ph) => ph.result!.compareTo(thresholdResult!) < 0)) {
         printf('One of the phenotypes got over the threshold.');
         _doneCompleter.complete();
         evaluator.destroy();
@@ -99,7 +99,7 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
     printf('var newGen = [');
     generations.last.members.forEach((ph) => printf('${ph.genesAsString},'));
     printf('];');
-    while (generations.length > MAX_GENERATIONS_IN_MEMORY) {
+    while (generations.length > maxGenerationsInMemory) {
       printf('- exceeding max generations, removing one from memory');
       generations.removeAt(0);
     }
@@ -142,13 +142,13 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
     }
   }
 
-  late Completer<Null> _generationCompleter;
+  late Completer<void> _generationCompleter;
 
   /// Evaluates the latest generation and completes when done.
   ///
   /// TODO: Allow for multiple members being evaluated in parallel via
   /// isolates.
-  Future evaluateLastGeneration() {
+  Future<void> evaluateLastGeneration() {
     _generationCompleter = Completer();
 
     memberIndex = 0;

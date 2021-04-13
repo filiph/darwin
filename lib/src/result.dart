@@ -1,3 +1,14 @@
+import 'package:meta/meta.dart';
+
+/// This is an encoding of a phenotype's fitness. In simple cases, you can
+/// just use [SingleObjectiveResult], which is just a single [double],
+/// essentially.
+///
+/// But many scenarios require multi-dimensional fitness results. For example,
+/// a car can have various degrees of being comfortable, safe and fast.
+/// When comparing two cars, you don't want to just average the three traits
+/// into one. This is the idea behind Pareto fronts and
+/// [Multi-objective optimization](https://en.wikipedia.org/wiki/Multi-objective_optimization).
 abstract class FitnessResult implements Comparable<FitnessResult> {
   /// Fitness results compare according to their [paretoRank] first and
   /// then according to the result of [evaluate].
@@ -20,15 +31,23 @@ abstract class FitnessResult implements Comparable<FitnessResult> {
     return false;
   }
 
+  /// Pareto rank of the fitness result. This is computed and assigned
+  /// in [GeneticAlgorithm._assignParetoRanks].
+  @nonVirtual
   int paretoRank = 1;
 
-  /// Evaluates to a single numeric value.
+  /// Evaluates to a single numeric value. This goes against
+  /// the multi-dimensionality of this class, but it's sometimes useful.
+  /// For example, fitness sharing needs it, and it's easier for printing
+  /// to the user.
   double? evaluate();
 }
 
 /// A way to combine results.
 typedef FitnessResultCombinator<T extends FitnessResult> = T Function(T a, T b);
 
+/// A subclass of [FitnessResult] that is just a single [value]
+/// (of type [double]).
 class SingleObjectiveResult extends FitnessResult {
   double? value;
 

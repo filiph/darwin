@@ -16,21 +16,21 @@ class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
         .where((P candidate) => ph.computeHammingDistance(candidate) < radius);
   }
 
-  num? cummulativeFitness;
+  num? cumulativeFitness;
   num? get averageFitness {
-    if (cummulativeFitness == null) return null;
-    return cummulativeFitness! / members.length;
+    if (cumulativeFitness == null) return null;
+    return cumulativeFitness! / members.length;
   }
 
   num? bestFitness;
 
-  /// Computes [cummulativeFitness] and [bestFitness], assuming all members of
+  /// Computes [cumulativeFitness] and [bestFitness], assuming all members of
   /// the population are scored.
   void computeSummary() {
-    cummulativeFitness = 0;
+    cumulativeFitness = 0;
     for (final ph in members) {
       final result = ph.result!.evaluate()!;
-      cummulativeFitness = cummulativeFitness! + result;
+      cumulativeFitness = cumulativeFitness! + result;
       if (bestFitness == null || result.compareTo(bestFitness!) < 0) {
         bestFitness = result;
         best = ph;

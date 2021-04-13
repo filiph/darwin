@@ -32,7 +32,7 @@ void main() {
       // have been graded by the evaluator).
       breeder = GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>(
           () => MyPhenotype())
-        ..crossoverPropability = 0.8;
+        ..crossoverProbability = 0.8;
 
       algo = GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult>(
           firstGeneration, evaluator, breeder, printf: (_) {
