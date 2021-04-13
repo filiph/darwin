@@ -47,7 +47,6 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
       );
 
       var results = await Future.wait(futures);
-      // print(results);
       for (final result in results) {
         if (result == null) continue;
         cumulativeResult = _resultCombinator(cumulativeResult, result);
