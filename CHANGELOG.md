@@ -1,3 +1,7 @@
+## 0.5.1
+
+- Make sure README links to `https` URLs (as per pub.dev guidelines)
+
 ## 0.5.0
 
 - BREAKING: Null Safety migration
