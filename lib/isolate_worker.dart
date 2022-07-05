@@ -56,12 +56,12 @@ class IsolateWorker<T, R> {
   late ReceivePort receivePort;
   late SendPort _isolatePort;
 
-  final Map<int, Completer> _completers = <int, Completer>{};
+  final Map<int, Completer<R?>> _completers = <int, Completer<R?>>{};
   int get queueLength => _completers.length;
   bool get isBusy => _completers.isNotEmpty;
   static const int maxQueueLength = 100;
   bool get isTooBusy => queueLength > maxQueueLength;
-  late StreamSubscription _portSubscription;
+  late StreamSubscription<dynamic> _portSubscription;
 
   // Worker(ReceivePort receivePort) : receivePort = receivePort;
   IsolateWorker();
@@ -111,7 +111,7 @@ class IsolateWorkerPool<T, R> {
 
   IsolateWorkerPool({this.count = 4});
 
-  Future init() async {
+  Future<void> init() async {
     var futures =
         List<Future<IsolateWorker<T, R>>>.generate(count, (index) async {
       var worker = IsolateWorker<T, R>();

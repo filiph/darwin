@@ -24,7 +24,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
       : _pool = IsolateWorkerPool<P, R>();
 
   @override
-  Future init() async {
+  Future<void> init() async {
     await _pool.init();
   }
 

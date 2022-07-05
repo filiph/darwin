@@ -7,7 +7,7 @@ void main() {
   Generation<MyPhenotype, bool, SingleObjectiveResult> firstGeneration;
   MyEvaluator evaluator;
   GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>? breeder;
-  late GeneticAlgorithm algo;
+  late GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult> algo;
 
   group('Genetic algorithm', () {
     // Set up the variables.
@@ -76,7 +76,8 @@ void main() {
 
     test('onGenerationEvaluatedController works', () async {
       // Register the hook;
-      algo.onGenerationEvaluated.listen((Generation g) {
+      algo.onGenerationEvaluated
+          .listen((Generation<MyPhenotype, bool, SingleObjectiveResult> g) {
         expect(g.averageFitness, isNotNull);
         expect(g.best, isNotNull);
       });
