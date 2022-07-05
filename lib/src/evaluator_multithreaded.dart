@@ -1,12 +1,11 @@
-library darwin.evaluator.multithreaded;
-
 import 'dart:async';
 
-import 'package:darwin/src/evaluator.dart';
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/isolate_worker.dart';
-import 'package:darwin/src/result.dart';
 import 'package:meta/meta.dart';
+
+import '../isolate_worker.dart';
+import 'evaluator.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 /// For use when multiple experiments should be done with each phenotype.
 @experimental

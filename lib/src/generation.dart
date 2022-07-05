@@ -1,7 +1,5 @@
-library darwin.generation;
-
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/src/result.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   List<P> members = <P>[];

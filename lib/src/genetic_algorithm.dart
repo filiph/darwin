@@ -1,12 +1,10 @@
-library darwin.genetic_algorithm;
-
 import 'dart:async';
 
-import 'package:darwin/src/breeder.dart';
-import 'package:darwin/src/evaluator.dart';
-import 'package:darwin/src/generation.dart';
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/src/result.dart';
+import 'breeder.dart';
+import 'evaluator.dart';
+import 'generation.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   final int generationSize;

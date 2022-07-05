@@ -1,10 +1,8 @@
-library darwin.evaluator;
-
 import 'dart:async';
 
-import 'package:darwin/src/genetic_algorithm.dart';
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/src/result.dart';
+import 'genetic_algorithm.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 // TODO: can be implemented as an Isolate
 abstract class PhenotypeEvaluator<P extends Phenotype<G, R>, G,

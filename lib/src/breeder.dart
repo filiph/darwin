@@ -1,10 +1,8 @@
-library darwin.breeder;
-
 import 'dart:math' as math;
 
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/src/generation.dart';
-import 'package:darwin/src/result.dart';
+import 'generation.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   GenerationBreeder(this.createBlankPhenotype);
