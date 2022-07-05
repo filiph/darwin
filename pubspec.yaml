@@ -1,5 +1,5 @@
 name: darwin
-version: 0.5.1
+version: 0.6.0-dev
 description: >
   A genetic/evolutionary algorithm library for Dart. Given a population
   of phenotypes, an evaluator (fitness function), and time, the algorithm

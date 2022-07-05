@@ -1,4 +1,4 @@
-## 0.6.0
+## 0.6.0-dev
 
 - BREAKING: rename `IsolateTask.MAX_INT` to `IsolateTask.maxInt`
 - BREAKING: rename `IsolateWorker.MAX_QUEUE` to `IsolateWorker.maxQueueLength`
