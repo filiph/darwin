@@ -3,11 +3,11 @@
 ///
 /// Example:
 ///
-///     var pool = new IsolateWorkerPool();
+///     var pool = IsolateWorkerPool();
 ///     await pool.init();
 ///     var tasks = [];
 ///     for (int i = 0; i < 1000; i++) {
-///       tasks.add(new FibonacciTask(30));
+///       tasks.add(FibonacciTask(30));
 ///     }
 ///     var results = await pool.sendMany(tasks);
 ///     results.forEach(print);
