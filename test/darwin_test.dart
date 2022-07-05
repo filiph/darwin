@@ -53,7 +53,7 @@ void main() {
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
       expect(algo.generations.first.bestFitness,
-          greaterThanOrEqualTo(algo.generations.last.bestFitness));
+          greaterThanOrEqualTo(algo.generations.last.bestFitness!));
     });
 
     test('works without fitness sharing', () async {
@@ -62,7 +62,7 @@ void main() {
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
       expect(algo.generations.first.bestFitness,
-          greaterThanOrEqualTo(algo.generations.last.bestFitness));
+          greaterThanOrEqualTo(algo.generations.last.bestFitness!));
     });
 
     test('works without elitism', () async {
@@ -71,7 +71,7 @@ void main() {
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
       expect(algo.generations.first.bestFitness,
-          greaterThanOrEqualTo(algo.generations.last.bestFitness));
+          greaterThanOrEqualTo(algo.generations.last.bestFitness!));
     });
 
     test('onGenerationEvaluatedController works', () async {
