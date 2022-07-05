@@ -17,7 +17,7 @@ void main() {
 
       // Fill it with random phenotypes.
       while (firstGeneration.members.length < 10) {
-        var member = MyPhenotype.Random();
+        var member = MyPhenotype.random();
         // Guard against a winning phenotype in first generation.
         if (member.genes.any((gene) => gene == false)) {
           firstGeneration.members.add(member);
@@ -113,7 +113,7 @@ class MyPhenotype extends Phenotype<bool, SingleObjectiveResult> {
 
   MyPhenotype();
 
-  MyPhenotype.Random() {
+  MyPhenotype.random() {
     genes = List<bool>.generate(geneCount, (index) => random.nextBool());
   }
 

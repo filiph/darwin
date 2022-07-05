@@ -97,7 +97,9 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
     printf('CREATING NEW GENERATION');
     generations.add(breeder!.breedNewGeneration(generations));
     printf('var newGen = [');
-    generations.last.members.forEach((ph) => printf('${ph.genesAsString},'));
+    for (var ph in generations.last.members) {
+      printf('${ph.genesAsString},');
+    }
     printf('];');
     while (generations.length > maxGenerationsInMemory) {
       printf('- exceeding max generations, removing one from memory');

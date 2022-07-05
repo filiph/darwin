@@ -44,9 +44,9 @@ abstract class IsolateTask<T, R> {
   final int id;
   R? result;
 
-  static const int MAX_INT = (1 << 32) - 1;
+  static const int maxInt = (1 << 32) - 1;
 
-  IsolateTask() : id = IsolateTask._random.nextInt(MAX_INT);
+  IsolateTask() : id = IsolateTask._random.nextInt(maxInt);
 
   R execute();
 }
@@ -59,15 +59,15 @@ class IsolateWorker<T, R> {
   final Map<int, Completer> _completers = <int, Completer>{};
   int get queueLength => _completers.length;
   bool get isBusy => _completers.isNotEmpty;
-  static const int MAX_QUEUE = 100;
-  bool get isTooBusy => queueLength > MAX_QUEUE;
+  static const int maxQueueLength = 100;
+  bool get isTooBusy => queueLength > maxQueueLength;
   late StreamSubscription _portSubscription;
 
   // Worker(ReceivePort receivePort) : receivePort = receivePort;
   IsolateWorker();
 
-  Future<Null> init() async {
-    var completer = Completer<Null>();
+  Future<void> init() async {
+    var completer = Completer<void>();
 
     receivePort = ReceivePort();
     await Isolate.spawn(_entryPoint, receivePort.sendPort);
@@ -109,7 +109,7 @@ class IsolateWorkerPool<T, R> {
 
   bool _initialized = false;
 
-  IsolateWorkerPool({int count = 4}) : count = count;
+  IsolateWorkerPool({this.count = 4});
 
   Future init() async {
     var futures =
@@ -123,7 +123,9 @@ class IsolateWorkerPool<T, R> {
   }
 
   void destroy() {
-    _workers.forEach((w) => w.destroy());
+    for (var worker in _workers) {
+      worker.destroy();
+    }
   }
 
   static final Random _random = Random();
@@ -135,7 +137,7 @@ class IsolateWorkerPool<T, R> {
     var worker = _workers[_random.nextInt(count)];
 
     while (worker.isTooBusy) {
-      await Future<Null>.delayed(const Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
     }
     return worker.send(task);
   }
