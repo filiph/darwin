@@ -1,3 +1,9 @@
+## 0.6.0
+
+- BREAKING: rename `IsolateTask.MAX_INT` to `IsolateTask.maxInt`
+- BREAKING: rename `IsolateWorker.MAX_QUEUE` to `IsolateWorker.maxQueueLength`
+- BREAKING: rename `MultithreadedPhenotypeSerialEvaluator.BATCH_SIZE` to `MultithreadedPhenotypeSerialEvaluator.batchSize`
+
 ## 0.5.1
 
 - Make sure README links to `https` URLs (as per pub.dev guidelines)
