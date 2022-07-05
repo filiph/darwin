@@ -169,7 +169,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// Iterates over [members] and raises their fitness score according to
   /// their uniqueness.
   ///
-  /// If [fitnessSharing] is [:false:], doesn't do anything.
+  /// If [fitnessSharing] is `false`, doesn't do anything.
   ///
   /// Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
   /// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf

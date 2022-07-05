@@ -57,8 +57,8 @@ abstract class Phenotype<G, R extends FitnessResult>
   int compareTo(Phenotype<G, R> other) => result!.compareTo(other.result!);
 
   /// Returns the degree to which this chromosome has dissimilar genes with the
-  /// other. If chromosomes are identical, returns [:0.0:]. If all genes are
-  /// different, returns [:1.0:].
+  /// other. If chromosomes are identical, returns `0.0`. If all genes are
+  /// different, returns `1.0`.
   ///
   /// Genes are considered different when they are not equal. There is no
   /// half-different gene (which would make sense for [num] genes, for example).

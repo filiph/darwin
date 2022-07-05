@@ -8,7 +8,7 @@ class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// by their Hamming distance being less than [radius].
   ///
   /// This _includes_ the original [ph] (Because [ph]'s Hamming distance to
-  /// itself is [:0:].)
+  /// itself is `0`.)
   Iterable<P> getSimilarPhenotypes(P ph, num radius) {
     return members
         .where((P candidate) => ph.computeHammingDistance(candidate) < radius);
