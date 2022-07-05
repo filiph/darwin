@@ -8,7 +8,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   GenerationBreeder(this.createBlankPhenotype);
 
   /// Function that generates blank (or random) phenotypes of type [P]. This
-  /// needs to be provided because `new T();` can't be used.
+  /// needs to be provided because `new P();` can't be used.
   final P Function() createBlankPhenotype;
 
   num mutationRate =
