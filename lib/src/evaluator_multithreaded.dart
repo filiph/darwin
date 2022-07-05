@@ -1,12 +1,11 @@
-library darwin.evaluator.multithreaded;
-
 import 'dart:async';
 
-import 'package:darwin/src/evaluator.dart';
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/isolate_worker.dart';
-import 'package:darwin/src/result.dart';
 import 'package:meta/meta.dart';
+
+import '../isolate_worker.dart';
+import 'evaluator.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 /// For use when multiple experiments should be done with each phenotype.
 @experimental
@@ -17,14 +16,14 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
   final FitnessResultCombinator<R> _resultCombinator;
   final R _initialResult;
 
-  static const int BATCH_SIZE = 5;
+  static const int batchSize = 5;
 
   MultithreadedPhenotypeSerialEvaluator(
       this._taskConstructor, this._resultCombinator, this._initialResult)
       : _pool = IsolateWorkerPool<P, R>();
 
   @override
-  Future init() async {
+  Future<void> init() async {
     await _pool.init();
   }
 
@@ -42,7 +41,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
 
     while (true) {
       var futures = List<Future<R?>>.generate(
-        BATCH_SIZE,
+        batchSize,
         (i) => _pool.send(_taskConstructor(phenotype, offset + i)),
       );
 
@@ -55,7 +54,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
 
       if (results.any((r) => r == null)) break;
 
-      offset += BATCH_SIZE;
+      offset += batchSize;
     }
     return cumulativeResult;
   }

@@ -1,17 +1,14 @@
-library darwin.breeder;
-
 import 'dart:math' as math;
 
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/src/generation.dart';
-import 'package:darwin/src/result.dart';
+import 'generation.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
-  GenerationBreeder(P Function() createBlankPhenotype)
-      : createBlankPhenotype = createBlankPhenotype;
+  GenerationBreeder(this.createBlankPhenotype);
 
   /// Function that generates blank (or random) phenotypes of type [P]. This
-  /// needs to be provided because `new T();` can't be used.
+  /// needs to be provided because `new P();` can't be used.
   final P Function() createBlankPhenotype;
 
   num mutationRate =
@@ -172,7 +169,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// Iterates over [members] and raises their fitness score according to
   /// their uniqueness.
   ///
-  /// If [fitnessSharing] is [:false:], doesn't do anything.
+  /// If [fitnessSharing] is `false`, doesn't do anything.
   ///
   /// Algorithm as described in Jeffrey Horn: The Nature of Niching, pp 20-21.
   /// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.8352&rep=rep1&type=pdf

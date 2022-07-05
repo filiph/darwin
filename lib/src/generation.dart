@@ -1,7 +1,5 @@
-library darwin.generation;
-
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/src/result.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   List<P> members = <P>[];
@@ -10,7 +8,7 @@ class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// by their Hamming distance being less than [radius].
   ///
   /// This _includes_ the original [ph] (Because [ph]'s Hamming distance to
-  /// itself is [:0:].)
+  /// itself is `0`.)
   Iterable<P> getSimilarPhenotypes(P ph, num radius) {
     return members
         .where((P candidate) => ph.computeHammingDistance(candidate) < radius);

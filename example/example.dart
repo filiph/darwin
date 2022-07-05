@@ -3,11 +3,11 @@ import 'dart:math';
 
 import 'package:darwin/darwin.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   // Create first generation, either by random or by continuing with existing
   // progress.
   var firstGeneration = Generation<MyPhenotype, bool, SingleObjectiveResult>()
-    ..members.addAll(List.generate(10, (_) => MyPhenotype.Random()));
+    ..members.addAll(List.generate(10, (_) => MyPhenotype.random()));
 
   // Evaluators take each phenotype and assign a fitness value to it according
   // to some fitness function.
@@ -30,8 +30,9 @@ Future<Null> main() async {
   await algo.runUntilDone();
 
   // Print all members of the last generation when done.
-  algo.generations.last.members
-      .forEach((Phenotype ph) => print('${ph.genesAsString}'));
+  for (var ph in algo.generations.last.members) {
+    print(ph.genesAsString);
+  }
 }
 
 Random random = Random();
@@ -54,7 +55,7 @@ class MyPhenotype extends Phenotype<bool, SingleObjectiveResult> {
 
   MyPhenotype();
 
-  MyPhenotype.Random() {
+  MyPhenotype.random() {
     genes = List.generate(geneCount, (index) => random.nextBool());
   }
 

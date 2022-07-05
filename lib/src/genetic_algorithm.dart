@@ -1,12 +1,10 @@
-library darwin.genetic_algorithm;
-
 import 'dart:async';
 
-import 'package:darwin/src/breeder.dart';
-import 'package:darwin/src/evaluator.dart';
-import 'package:darwin/src/generation.dart';
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/src/result.dart';
+import 'breeder.dart';
+import 'evaluator.dart';
+import 'generation.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   final int generationSize;
@@ -97,7 +95,9 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
     printf('CREATING NEW GENERATION');
     generations.add(breeder!.breedNewGeneration(generations));
     printf('var newGen = [');
-    generations.last.members.forEach((ph) => printf('${ph.genesAsString},'));
+    for (var ph in generations.last.members) {
+      printf('${ph.genesAsString},');
+    }
     printf('];');
     while (generations.length > maxGenerationsInMemory) {
       printf('- exceeding max generations, removing one from memory');

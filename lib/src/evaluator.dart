@@ -1,10 +1,8 @@
-library darwin.evaluator;
-
 import 'dart:async';
 
-import 'package:darwin/src/genetic_algorithm.dart';
-import 'package:darwin/src/phenotype.dart';
-import 'package:darwin/src/result.dart';
+import 'genetic_algorithm.dart';
+import 'phenotype.dart';
+import 'result.dart';
 
 // TODO: can be implemented as an Isolate
 abstract class PhenotypeEvaluator<P extends Phenotype<G, R>, G,
@@ -20,7 +18,7 @@ abstract class PhenotypeEvaluator<P extends Phenotype<G, R>, G,
   void destroy() {}
 
   /// Takes the phenotype and returns its fitness score. The lower the
-  /// fitness score, the better the phenotype. Fitness score of [:0.0:] means
+  /// fitness score, the better the phenotype. Fitness score of `0.0` means
   /// that the phenotype is perfect.
   Future<R> evaluate(P phenotype);
 
@@ -52,7 +50,7 @@ abstract class PhenotypeSerialEvaluator<P extends Phenotype<G, R>, G,
 
   /// Runs one of the experiments to be performed on the given [phenotype].
   /// Should complete with the result of the [IterativeFitnessFunction], or with
-  /// [:null:] when there are no other experiments to run.
+  /// `null` when there are no other experiments to run.
   Future<R> runOneEvaluation(P phenotype, int experimentIndex);
 
   void _next(P phenotype, int experimentIndex) {

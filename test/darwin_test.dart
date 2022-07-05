@@ -7,7 +7,7 @@ void main() {
   Generation<MyPhenotype, bool, SingleObjectiveResult> firstGeneration;
   MyEvaluator evaluator;
   GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>? breeder;
-  late GeneticAlgorithm algo;
+  late GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult> algo;
 
   group('Genetic algorithm', () {
     // Set up the variables.
@@ -17,7 +17,7 @@ void main() {
 
       // Fill it with random phenotypes.
       while (firstGeneration.members.length < 10) {
-        var member = MyPhenotype.Random();
+        var member = MyPhenotype.random();
         // Guard against a winning phenotype in first generation.
         if (member.genes.any((gene) => gene == false)) {
           firstGeneration.members.add(member);
@@ -53,7 +53,7 @@ void main() {
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
       expect(algo.generations.first.bestFitness,
-          greaterThanOrEqualTo(algo.generations.last.bestFitness));
+          greaterThanOrEqualTo(algo.generations.last.bestFitness!));
     });
 
     test('works without fitness sharing', () async {
@@ -62,7 +62,7 @@ void main() {
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
       expect(algo.generations.first.bestFitness,
-          greaterThanOrEqualTo(algo.generations.last.bestFitness));
+          greaterThanOrEqualTo(algo.generations.last.bestFitness!));
     });
 
     test('works without elitism', () async {
@@ -71,12 +71,13 @@ void main() {
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
       expect(algo.generations.first.bestFitness,
-          greaterThanOrEqualTo(algo.generations.last.bestFitness));
+          greaterThanOrEqualTo(algo.generations.last.bestFitness!));
     });
 
     test('onGenerationEvaluatedController works', () async {
       // Register the hook;
-      algo.onGenerationEvaluated.listen((Generation g) {
+      algo.onGenerationEvaluated
+          .listen((Generation<MyPhenotype, bool, SingleObjectiveResult> g) {
         expect(g.averageFitness, isNotNull);
         expect(g.best, isNotNull);
       });
@@ -113,7 +114,7 @@ class MyPhenotype extends Phenotype<bool, SingleObjectiveResult> {
 
   MyPhenotype();
 
-  MyPhenotype.Random() {
+  MyPhenotype.random() {
     genes = List<bool>.generate(geneCount, (index) => random.nextBool());
   }
 
