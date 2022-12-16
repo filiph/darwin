@@ -17,7 +17,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
   final FitnessResultCombinator<R> _resultCombinator;
   final R _initialResult;
 
-  static const int BATCH_SIZE = 5;
+  static const int batchSize = 5;
 
   MultithreadedPhenotypeSerialEvaluator(
       this._taskConstructor, this._resultCombinator, this._initialResult)
@@ -42,7 +42,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
 
     while (true) {
       var futures = List<Future<R?>>.generate(
-        BATCH_SIZE,
+        batchSize,
         (i) => _pool.send(_taskConstructor(phenotype, offset + i)),
       );
 
@@ -55,7 +55,7 @@ abstract class MultithreadedPhenotypeSerialEvaluator<P extends Phenotype<G, R>,
 
       if (results.any((r) => r == null)) break;
 
-      offset += BATCH_SIZE;
+      offset += batchSize;
     }
     return cumulativeResult;
   }

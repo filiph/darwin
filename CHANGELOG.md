@@ -1,3 +1,13 @@
+## 0.6.0
+
+- Update to conform latest Dart style and `pkg:lints`
+  - BREAKING: `IsolateTask.MAX_INT` is now `IsolateTask.maxInt`
+  - BREAKING: `IsolateWorker.MAX_QUEUE` is now `IsolateWorker.maxQueue`
+  - BREAKING: `MultithreadedPhenotypeSerialEvaluator.BATCH_SIZE` is now
+    `MultithreadedPhenotypeSerialEvaluator.batchSize`
+- Replace wrong usage of `Null` with the correct `void`
+- Fix non-standard name of constructor (`MyPhenotype.Random`) in example
+
 ## 0.5.1
 
 - Make sure README links to `https` URLs (as per pub.dev guidelines)

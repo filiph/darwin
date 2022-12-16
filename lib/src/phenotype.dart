@@ -3,7 +3,6 @@ library darwin.phenotype;
 import 'dart:convert';
 
 import 'package:darwin/darwin.dart';
-import 'package:darwin/src/result.dart';
 import 'package:meta/meta.dart';
 
 /// A phenotype (also called chromosome or genotype) is one particular solution
