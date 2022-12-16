@@ -21,7 +21,7 @@ abstract class FitnessResult implements Comparable<FitnessResult> {
     if (paretoRank != other.paretoRank) {
       return paretoRank.compareTo(other.paretoRank);
     }
-    return evaluate()!.compareTo(other.evaluate()!);
+    return evaluate().compareTo(other.evaluate());
   }
 
   /// A result dominates other results if it's better in every aspect.
@@ -38,7 +38,7 @@ abstract class FitnessResult implements Comparable<FitnessResult> {
   /// the multi-dimensionality of this class, but it's sometimes useful.
   /// For example, fitness sharing needs it, and it's easier for printing
   /// to the user.
-  double? evaluate();
+  double evaluate();
 }
 
 /// A way to combine results.
@@ -47,24 +47,24 @@ typedef FitnessResultCombinator<T extends FitnessResult> = T Function(T a, T b);
 /// A subclass of [FitnessResult] that is just a single [value]
 /// (of type [double]).
 class SingleObjectiveResult extends FitnessResult {
-  double? value;
+  double value;
+
+  SingleObjectiveResult(this.value);
 
   @override
   int compareTo(covariant SingleObjectiveResult other) =>
-      value!.compareTo(other.value!);
+      value.compareTo(other.value);
 
   @override
-  double? evaluate() => value;
+  double evaluate() => value;
 
   @override
   bool dominates(SingleObjectiveResult other) {
-    return (value ?? 0.0) > (other.value ?? 0.0);
+    return value > other.value;
   }
 }
 
 SingleObjectiveResult singleObjectiveResultCombinator(
     SingleObjectiveResult a, SingleObjectiveResult b) {
-  final result = SingleObjectiveResult();
-  result.value = a.value ?? 0.0 + (b.value ?? 0.0);
-  return result;
+  return SingleObjectiveResult( a.value + b.value);
 }

@@ -29,7 +29,7 @@ class Generation<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   void computeSummary() {
     cumulativeFitness = 0;
     for (final ph in members) {
-      final result = ph.result!.evaluate()!;
+      final result = ph.result!.evaluate();
       cumulativeFitness = cumulativeFitness! + result;
       if (bestFitness == null || result.compareTo(bestFitness!) < 0) {
         bestFitness = result;

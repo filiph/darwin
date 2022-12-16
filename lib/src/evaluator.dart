@@ -58,16 +58,16 @@ abstract class PhenotypeSerialEvaluator<P extends Phenotype<G, R>, G,
   void _next(P phenotype, int experimentIndex) {
     runOneEvaluation(phenotype, experimentIndex).then((R? result) {
       if (result == null) {
-        printf('Cummulative result for phenotype: $cumulativeResult');
+        printf('Cumulative result for phenotype: $cumulativeResult');
         _completer.complete(cumulativeResult);
-      } else if (result.evaluate()!.isInfinite) {
+      } else if (result.evaluate().isInfinite) {
         printf(
             'Result for experiment #$experimentIndex: FAIL\nFailing phenotype');
         _completer.complete(cumulativeResult);
       } else {
         cumulativeResult = _resultCombinator(cumulativeResult, result);
         printf(
-            'Result for experiment: $result (cummulative: $cumulativeResult)');
+            'Result for experiment: $result (cumulative: $cumulativeResult)');
         _next(phenotype, experimentIndex + 1);
       }
     });

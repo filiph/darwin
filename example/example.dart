@@ -43,9 +43,8 @@ class MyEvaluator
   Future<SingleObjectiveResult> evaluate(MyPhenotype phenotype) {
     // This implementation just counts false values - the more false values,
     // the worse outcome of the fitness function.
-    final result = SingleObjectiveResult();
-    result.value =
-        phenotype.genes.where((bool v) => v == false).length.toDouble();
+    final result = SingleObjectiveResult(
+        phenotype.genes.where((bool v) => v == false).length.toDouble());
     return Future.value(result);
   }
 }

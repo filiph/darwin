@@ -192,7 +192,7 @@ class GenerationBreeder<P extends Phenotype<G, R>, G, R extends FitnessResult> {
       // The algorithm is modified - we multiply the result instead of
       // dividing it. (Because we count 0.0 as perfect fitness. The smaller
       // the result number, the fitter the phenotype.)
-      ph.resultWithFitnessSharingApplied = ph.result!.evaluate()! * nicheCount;
+      ph.resultWithFitnessSharingApplied = ph.result!.evaluate() * nicheCount;
     }
   }
 }
