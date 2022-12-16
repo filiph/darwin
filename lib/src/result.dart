@@ -51,6 +51,7 @@ class SingleObjectiveResult extends FitnessResult {
   /// the better the result.
   double value;
 
+  /// Creates a new single objective result with [value].
   SingleObjectiveResult(this.value);
 
   @override

@@ -1,3 +1,9 @@
+## 0.7.0
+
+- Fix wrong polarity of `dominates()`
+- BREAKING: Make list of `Generation.members` final
+- BREAKING: `evaluateLastGeneration` --> `evaluateLatestGeneration`
+
 ## 0.6.0
 
 - Update to conform latest Dart style and `pkg:lints`

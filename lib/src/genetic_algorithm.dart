@@ -60,7 +60,7 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
 
   // TODO(filiph): Rewrite to async functions instead of a bunch of Completers
   void _evaluateNextGeneration() {
-    evaluateLastGeneration().then<void>((dynamic _) {
+    evaluateLatestGeneration().then<void>((dynamic _) {
       printf('Applying niching to results.');
       breeder!.applyFitnessSharingToResults(generations.last);
       printf('Generation #$currentGeneration evaluation done. Results:');
@@ -150,7 +150,7 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
   ///
   /// TODO: Allow for multiple members being evaluated in parallel via
   /// isolates.
-  Future<void> evaluateLastGeneration() {
+  Future<void> evaluateLatestGeneration() {
     _generationCompleter = Completer();
 
     memberIndex = 0;
