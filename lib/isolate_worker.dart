@@ -44,7 +44,7 @@ abstract class IsolateTask<T, R> {
   final int id;
   R? result;
 
-  static const int maxInt = (1 << 32) - 1 ;
+  static const int maxInt = (1 << 32) - 1;
 
   IsolateTask() : id = IsolateTask._random.nextInt(maxInt);
 

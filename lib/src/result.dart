@@ -47,24 +47,22 @@ typedef FitnessResultCombinator<T extends FitnessResult> = T Function(T a, T b);
 /// A subclass of [FitnessResult] that is just a single [value]
 /// (of type [double]).
 class SingleObjectiveResult extends FitnessResult {
+  /// The actual value of the result. Following convention, the lower the value,
+  /// the better the result.
   double value;
 
   SingleObjectiveResult(this.value);
-
-  @override
-  int compareTo(covariant SingleObjectiveResult other) =>
-      value.compareTo(other.value);
 
   @override
   double evaluate() => value;
 
   @override
   bool dominates(SingleObjectiveResult other) {
-    return value > other.value;
+    return value < other.value;
   }
 }
 
 SingleObjectiveResult singleObjectiveResultCombinator(
     SingleObjectiveResult a, SingleObjectiveResult b) {
-  return SingleObjectiveResult( a.value + b.value);
+  return SingleObjectiveResult(a.value + b.value);
 }

@@ -6,7 +6,7 @@ import 'dart:async';
 void main() {
   Generation<MyPhenotype, bool, SingleObjectiveResult> firstGeneration;
   MyEvaluator evaluator;
-  GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>? breeder;
+  late GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult> breeder;
   late GeneticAlgorithm algo;
 
   group('Genetic algorithm', () {
@@ -28,8 +28,8 @@ void main() {
       // to some fitness function.
       evaluator = MyEvaluator();
 
-      // Breeders are in charge of creating new generations from previous ones (that
-      // have been graded by the evaluator).
+      // Breeders are in charge of creating new generations from previous ones
+      // (that have been graded by the evaluator).
       breeder = GenerationBreeder<MyPhenotype, bool, SingleObjectiveResult>(
           () => MyPhenotype())
         ..crossoverProbability = 0.8;
@@ -57,7 +57,7 @@ void main() {
     });
 
     test('works without fitness sharing', () async {
-      breeder!.fitnessSharing = false;
+      breeder.fitnessSharing = false;
       // Start the algorithm.
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
@@ -66,7 +66,7 @@ void main() {
     });
 
     test('works without elitism', () async {
-      breeder!.elitismCount = 0;
+      breeder.elitismCount = 0;
       // Start the algorithm.
       await algo.runUntilDone();
       // Remember, lower fitness result is better.
