@@ -27,9 +27,7 @@ abstract class FitnessResult implements Comparable<FitnessResult> {
   /// A result dominates other results if it's better in every aspect.
   ///
   /// Subclasses are supposed to overload this method.
-  bool dominates(covariant FitnessResult? other) {
-    return false;
-  }
+  bool dominates(covariant FitnessResult other);
 
   /// Pareto rank of the fitness result. This is computed and assigned
   /// in [GeneticAlgorithm._assignParetoRanks].
@@ -57,6 +55,11 @@ class SingleObjectiveResult extends FitnessResult {
 
   @override
   double? evaluate() => value;
+
+  @override
+  bool dominates(SingleObjectiveResult other) {
+    return (value ?? 0.0) > (other.value ?? 0.0);
+  }
 }
 
 SingleObjectiveResult singleObjectiveResultCombinator(

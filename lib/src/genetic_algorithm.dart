@@ -136,7 +136,7 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
       var rank = 1;
       for (final other in generations.last.members) {
         if (ph == other) continue;
-        if (other.result!.dominates(ph.result)) {
+        if (other.result!.dominates(ph.result!)) {
           rank += 1;
         }
       }
