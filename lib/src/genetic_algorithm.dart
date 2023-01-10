@@ -40,12 +40,29 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
     _onGenerationEvaluatedController = StreamController<Generation<P, G, R>>();
   }
 
-  late Completer<void> _doneCompleter;
   Future<void> runUntilDone() async {
-    _doneCompleter = Completer<void>();
     await evaluator.init();
-    _evaluateNextGeneration();
-    return _doneCompleter.future;
+
+    while (true) {
+      await _evaluateNextGeneration();
+
+      if (currentExperiment >= maxExperiments) {
+        printf('All experiments done ($currentExperiment)');
+        break;
+      }
+
+      if (thresholdResult != null &&
+          generations.last.members
+              .any((P ph) => ph.result!.compareTo(thresholdResult!) < 0)) {
+        printf('One of the phenotypes got over the threshold.');
+        break;
+      }
+
+      _onGenerationEvaluatedController.add(generations.last);
+      _createNewGeneration();
+      currentGeneration++;
+    }
+    evaluator.destroy();
   }
 
   /// Function used for printing info about the progress of the genetic
@@ -58,39 +75,20 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   /// the ideal implementation.
   final PrintFunction statusf;
 
-  // TODO(filiph): Rewrite to async functions instead of a bunch of Completers
-  void _evaluateNextGeneration() {
-    evaluateLatestGeneration().then<void>((dynamic _) {
-      printf('Applying niching to results.');
-      breeder!.applyFitnessSharingToResults(generations.last);
-      printf('Generation #$currentGeneration evaluation done. Results:');
-      printf('- ${generations.last.averageFitness!.toStringAsFixed(2)} AVG');
-      printf('- ${generations.last.bestFitness!.toStringAsFixed(2)} BEST');
-      statusf('''
+  Future<void> _evaluateNextGeneration() async {
+    await _runEvaluations();
+
+    printf('Applying niching to results.');
+    breeder!.applyFitnessSharingToResults(generations.last);
+    printf('Generation #$currentGeneration evaluation done. Results:');
+    printf('- ${generations.last.averageFitness!.toStringAsFixed(2)} AVG');
+    printf('- ${generations.last.bestFitness!.toStringAsFixed(2)} BEST');
+    statusf('''
 GENERATION #$currentGeneration
 AVG  ${generations.last.averageFitness!.toStringAsFixed(2)}
 BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
 ''');
-      printf('---');
-      _onGenerationEvaluatedController.add(generations.last);
-      if (currentExperiment >= maxExperiments) {
-        printf('All experiments done ($currentExperiment)');
-        _doneCompleter.complete();
-        evaluator.destroy();
-        return;
-      }
-      if (thresholdResult != null &&
-          generations.last.members
-              .any((P ph) => ph.result!.compareTo(thresholdResult!) < 0)) {
-        printf('One of the phenotypes got over the threshold.');
-        _doneCompleter.complete();
-        evaluator.destroy();
-        return;
-      }
-      _createNewGeneration();
-      currentGeneration++;
-      _evaluateNextGeneration();
-    });
+    printf('---');
   }
 
   void _createNewGeneration() {
@@ -105,25 +103,6 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
       printf('- exceeding max generations, removing one from memory');
       generations.removeAt(0);
     }
-  }
-
-  int? memberIndex;
-  void _evaluateNextGenerationMember() {
-    var currentPhenotype = generations.last.members[memberIndex!];
-    evaluator.evaluate(currentPhenotype).then((R result) {
-      currentPhenotype.result = result;
-
-      currentExperiment++;
-      memberIndex = memberIndex! + 1;
-      if (memberIndex! < generations.last.members.length) {
-        _evaluateNextGenerationMember();
-      } else {
-        _assignParetoRanks();
-        generations.last.computeSummary();
-        _generationCompleter.complete();
-        return;
-      }
-    });
   }
 
   /// Pareto rank according to Konak 2006:
@@ -144,19 +123,16 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
     }
   }
 
-  late Completer<void> _generationCompleter;
-
   /// Evaluates the latest generation and completes when done.
-  ///
-  /// TODO: Allow for multiple members being evaluated in parallel via
-  /// isolates.
-  Future<void> evaluateLatestGeneration() {
-    _generationCompleter = Completer();
+  Future<void> _runEvaluations() async {
+    for (final currentPhenotype in generations.last.members) {
+      final result = await evaluator.evaluate(currentPhenotype);
+      currentPhenotype.result = result;
+      currentExperiment++;
+    }
 
-    memberIndex = 0;
-    _evaluateNextGenerationMember();
-
-    return _generationCompleter.future;
+    _assignParetoRanks();
+    generations.last.computeSummary();
   }
 }
 
