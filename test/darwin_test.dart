@@ -35,7 +35,7 @@ void main() {
         ..crossoverProbability = 0.8;
 
       algo = GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult>(
-          firstGeneration, evaluator, breeder, printf: (_) {
+          firstGeneration, [evaluator], breeder, printf: (_) {
         return;
       }, statusf: (_) {
         return;

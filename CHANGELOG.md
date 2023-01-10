@@ -1,3 +1,9 @@
+## 0.8.0
+
+- BREAKING: `GeneticAlgorithm` now takes a _list_ of evaluators.
+  This is so that evaluations can happen in parallel.
+- Refactor use of `.then()` to `await`
+
 ## 0.7.0
 
 - Fix wrong polarity of `dominates()`

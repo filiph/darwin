@@ -22,7 +22,7 @@ Future<void> main() async {
 
   var algo = GeneticAlgorithm<MyPhenotype, bool, SingleObjectiveResult>(
     firstGeneration,
-    evaluator,
+    [evaluator],
     breeder,
   );
 

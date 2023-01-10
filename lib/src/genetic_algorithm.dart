@@ -27,21 +27,27 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
   final generations = <Generation<P, G, R>>[];
   Iterable<P> get population =>
       generations.expand((Generation<P, G, R> gen) => gen.members);
-  final PhenotypeEvaluator<P, G, R> evaluator;
+
+  /// A list of evaluators. Each generation will be split into batches
+  /// so that [evaluators] can evaluate in parallel.
+  final List<PhenotypeEvaluator<P, G, R>> evaluators;
+
   final GenerationBreeder<P, G, R>? breeder;
 
   GeneticAlgorithm(
-      Generation<P, G, R> firstGeneration, this.evaluator, this.breeder,
+      Generation<P, G, R> firstGeneration, this.evaluators, this.breeder,
       {this.printf = print, this.statusf = print})
       : generationSize = firstGeneration.members.length {
     generations.add(firstGeneration);
-    evaluator.printf = printf;
+    for (final evaluator in evaluators) {
+      evaluator.printf = printf;
+    }
 
     _onGenerationEvaluatedController = StreamController<Generation<P, G, R>>();
   }
 
   Future<void> runUntilDone() async {
-    await evaluator.init();
+    await Future.wait(evaluators.map((e) => e.init()));
 
     while (true) {
       await _evaluateNextGeneration();
@@ -62,7 +68,10 @@ class GeneticAlgorithm<P extends Phenotype<G, R>, G, R extends FitnessResult> {
       _createNewGeneration();
       currentGeneration++;
     }
-    evaluator.destroy();
+
+    for (final evaluator in evaluators) {
+      evaluator.destroy();
+    }
   }
 
   /// Function used for printing info about the progress of the genetic
@@ -125,11 +134,39 @@ BEST ${generations.last.bestFitness!.toStringAsFixed(2)}
 
   /// Evaluates the latest generation and completes when done.
   Future<void> _runEvaluations() async {
-    for (final currentPhenotype in generations.last.members) {
-      final result = await evaluator.evaluate(currentPhenotype);
-      currentPhenotype.result = result;
-      currentExperiment++;
+    // Split current generation into roughly same-size sets.
+    final maxPhenotypesPerSet =
+        (generations.last.members.length / evaluators.length).ceil();
+    final batches = <List<P>>[];
+    var current = <P>[];
+    for (final member in generations.last.members) {
+      current.add(member);
+      if (current.length == maxPhenotypesPerSet) {
+        batches.add(current);
+        current = <P>[];
+      }
     }
+    if (current.isNotEmpty) {
+      batches.add(current);
+    }
+    assert(batches.length == evaluators.length);
+
+    Future<void> runBatch(
+        PhenotypeEvaluator<P, G, R> evaluator, List<P> phenotypes) async {
+      for (final currentPhenotype in phenotypes) {
+        final result = await evaluator.evaluate(currentPhenotype);
+        currentPhenotype.result = result;
+        currentExperiment++;
+      }
+    }
+
+    final futures = <Future<void>>[];
+    for (var i = 0; i < evaluators.length; i++) {
+      final future = runBatch(evaluators[i], batches[i]);
+      futures.add(future);
+    }
+
+    await Future.wait(futures);
 
     _assignParetoRanks();
     generations.last.computeSummary();
